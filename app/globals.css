@@ -7,6 +7,10 @@ html,
 body {
   width: 100vw;
   height: 100vh;
+
+  --rich-black: #0a0a0a;
+  --black-chocolate: #100d08;
+  --coffee-bean: #1b1b1b;
 }
 
 :root {
@@ -18,23 +22,25 @@ body {
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-start-rgb: var(--rich-black);
+    --background-end-rgb: var(--rich-black);
   }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: linear-gradient(to bottom, transparent, var(--background-end-rgb))
+    var(--background-start-rgb);
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-nav-item {
+    @apply text-neutral-600;
+  }
+  .text-nav-item-hightlight {
+    @apply text-neutral-200;
   }
 }
