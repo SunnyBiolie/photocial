@@ -13,7 +13,7 @@ export const ItemPopup = ({ Icon }: Props) => {
 
   return (
     <div
-      className="relative size-14 flex items-center justify-center cursor-pointer text-nav-item hover:text-nav-item-hightlight transition-all"
+      className="relative size-14 flex items-center justify-center cursor-pointer text-unselected hover:text-normal transition-all"
       onClick={() => setIsOpen(true)}
     >
       <Icon />

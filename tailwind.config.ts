@@ -19,6 +19,9 @@ const config: Config = {
         "rich-black": "var(--rich-black)",
         "black-chocolate": "var(--black-chocolate)",
         "coffee-bean": "var(--coffee-bean)",
+        jet: "var(--jet)",
+        normal: "var(--normal)",
+        unselected: "var(--unselected)",
       },
       keyframes: {
         "nav-item_click": {
