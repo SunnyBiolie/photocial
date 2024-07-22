@@ -4,10 +4,10 @@ import { ElementRef, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { StateHeader } from "./state-header";
+import { StateHeader } from "../state-header";
 import { BiUndo } from "react-icons/bi";
 
-export const CreatePostAdvancedCrop = () => {
+export const CNP_AdvancedCrop_MD = () => {
   const {
     setState,
     currentIndex,
@@ -16,6 +16,7 @@ export const CreatePostAdvancedCrop = () => {
     setArrImgPreCropData,
   } = useCreateNewPost();
 
+  const containerRef = useRef<ElementRef<"div">>(null);
   const imgContainerRef = useRef<ElementRef<"div">>(null);
   const cropperRef = useRef<ElementRef<"div">>(null);
   const gridRef = useRef<ElementRef<"div">>(null);
@@ -27,17 +28,36 @@ export const CreatePostAdvancedCrop = () => {
 
   const topLeftCornerRef = useRef<ElementRef<"div">>(null);
 
-  const [containerSize, setContainerSize] = useState<[number, number]>();
+  const [containerAR, setContainerAR] = useState<number>();
+  const [imgContainerSize, setImgContainerSize] = useState<[number, number]>();
 
   useEffect(() => {
-    const containerTarget = imgContainerRef.current;
+    const containerTarget = containerRef.current;
     if (containerTarget) {
-      const imgWidth = containerTarget.getBoundingClientRect().width;
-      const imgHeight = containerTarget.getBoundingClientRect().height;
-      setContainerSize([imgWidth, imgHeight]);
+      setContainerAR(
+        containerTarget.offsetWidth / containerTarget.offsetHeight
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const backToPreviousState = () => {
+      setState("ar");
+    };
+
+    window.addEventListener("resize", backToPreviousState);
+
+    return () => {
+      window.removeEventListener("resize", backToPreviousState);
+    };
+  }, [setState]);
+
+  useEffect(() => {
+    const imgContainerTarget = imgContainerRef.current;
+    if (imgContainerTarget) {
+      const imgWidth = imgContainerTarget.getBoundingClientRect().width;
+      const imgHeight = imgContainerTarget.getBoundingClientRect().height;
+      setImgContainerSize([imgWidth, imgHeight]);
+    }
+  }, [containerAR]);
 
   if (!arrImgPreCropData) return;
 
@@ -53,7 +73,7 @@ export const CreatePostAdvancedCrop = () => {
     const rightDivTarget = rightDivRef.current;
 
     if (
-      !containerSize ||
+      !imgContainerSize ||
       !cropperTarget ||
       !gridTarget ||
       !topDivTarget ||
@@ -68,8 +88,8 @@ export const CreatePostAdvancedCrop = () => {
     const onMove = (e: MouseEvent) => {
       gridTarget.style.display = "grid";
 
-      const imgWidth = containerSize[0];
-      const imgHeight = containerSize[1];
+      const imgWidth = imgContainerSize[0];
+      const imgHeight = imgContainerSize[1];
 
       const cropperWidth = cropperTarget.offsetWidth;
       const cropperHeight = cropperTarget.getBoundingClientRect().height;
@@ -77,9 +97,10 @@ export const CreatePostAdvancedCrop = () => {
       const cropperLeft = cropperTarget.offsetLeft;
 
       if (cropperTop + e.movementY <= 0) cropperTarget.style.top = "0px";
-      else if (cropperTop + e.movementY >= imgHeight - cropperHeight)
+      else if (cropperTop + e.movementY >= imgHeight - cropperHeight) {
         cropperTarget.style.top = imgHeight - cropperHeight + "px";
-      else cropperTarget.style.top = cropperTop + e.movementY + "px";
+        bottomDivTarget.style.height = "0px";
+      } else cropperTarget.style.top = cropperTop + e.movementY + "px";
 
       if (cropperLeft + e.movementX <= 0) cropperTarget.style.left = "0px";
       else if (cropperLeft + e.movementX >= imgWidth - cropperWidth) {
@@ -118,7 +139,7 @@ export const CreatePostAdvancedCrop = () => {
     const rightDivTarget = rightDivRef.current;
 
     if (
-      !containerSize ||
+      !imgContainerSize ||
       !cropperTarget ||
       !topDivTarget ||
       !bottomDivTarget ||
@@ -128,8 +149,8 @@ export const CreatePostAdvancedCrop = () => {
       return;
 
     const onMove = (e: MouseEvent) => {
-      const imgWidth = containerSize[0];
-      const imgHeight = containerSize[1];
+      const imgWidth = imgContainerSize[0];
+      const imgHeight = imgContainerSize[1];
 
       const cropperWidth = cropperTarget.offsetWidth;
       const cropperHeight = cropperTarget.getBoundingClientRect().height;
@@ -294,17 +315,17 @@ export const CreatePostAdvancedCrop = () => {
 
   const handleSaveChange = () => {
     const cropperTarget = cropperRef.current;
-    if (containerSize && cropperTarget) {
+    if (imgContainerSize && cropperTarget) {
       setState("ar");
       setArrImgPreCropData((prev) => {
         if (prev) {
           prev![currentIndex].perCropPos = [
-            cropperTarget.offsetTop / containerSize[1],
-            cropperTarget.offsetLeft / containerSize[0],
+            cropperTarget.offsetTop / imgContainerSize[1],
+            cropperTarget.offsetLeft / imgContainerSize[0],
           ];
           prev![currentIndex].perCropSize = [
-            cropperTarget.offsetWidth / containerSize[0],
-            cropperTarget.offsetHeight / containerSize[1],
+            cropperTarget.offsetWidth / imgContainerSize[0],
+            cropperTarget.offsetHeight / imgContainerSize[1],
           ];
         }
         return prev;
@@ -313,7 +334,7 @@ export const CreatePostAdvancedCrop = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in select-none">
       <StateHeader
         tilte="Crop in more detail"
         LeftBtn={BiUndo}
@@ -322,108 +343,117 @@ export const CreatePostAdvancedCrop = () => {
         rightBtn="Done"
         handleRightBtn={handleSaveChange}
       />
-      <div className="relative w-[800px] h-[500px] flex items-center justify-center bg-neutral-950/50 px-1">
-        <div
-          ref={imgContainerRef}
-          className={cn(
-            "relative",
-            currOriImgData.intrinsicAR > 1.6 ? "w-full" : "h-full"
-          )}
-          style={{ aspectRatio: currOriImgData.intrinsicAR }}
-        >
-          <Image
-            src={currOriImgData.originURL}
-            alt=""
-            fill
-            className="object-cover"
-          />
-          {containerSize && (
-            <div className="absolute top-0 left-0 size-full flex animate-fade-in">
-              <div
-                ref={leftDivRef}
-                className="absolute top-0 left-0 h-full bg-neutral-950/75"
-                style={{
-                  width: currOriImgData.perCropPos[1] * containerSize[0],
-                }}
-              ></div>
-              <div className="flex flex-col">
+      <div
+        ref={containerRef}
+        className="relative w-[min(100vw-16px,75vh)] aspect-square  flex items-center justify-center dark:bg-neutral-950/75 backdrop-blur-sm px-1 md:w-[min(100vw-16px,800px)] md:h-[500px]"
+      >
+        {containerAR && (
+          <div
+            ref={imgContainerRef}
+            className={cn(
+              "relative",
+              currOriImgData.intrinsicAR > containerAR ? "w-full" : "h-full"
+            )}
+            style={{ aspectRatio: currOriImgData.intrinsicAR }}
+          >
+            <Image
+              src={currOriImgData.originURL}
+              alt=""
+              fill
+              className="object-cover"
+            />
+            {imgContainerSize && (
+              <div className="absolute top-0 left-0 size-full flex">
                 <div
-                  ref={topDivRef}
-                  className="absolute top-0 bg-neutral-950/75"
+                  ref={leftDivRef}
+                  className="absolute top-0 left-0 h-full bg-neutral-950/75"
                   style={{
-                    width: currOriImgData.perCropSize[0] * containerSize[0],
-                    height: currOriImgData.perCropPos[0] * containerSize[1],
-                    left: currOriImgData.perCropPos[1] * containerSize[0],
+                    width: currOriImgData.perCropPos[1] * imgContainerSize[0],
                   }}
                 ></div>
-                <div
-                  ref={cropperRef}
-                  className="absolute cursor-grab border-2 border-sky-100/75 z-10"
-                  style={{
-                    width: currOriImgData.perCropSize[0] * containerSize[0],
-                    aspectRatio,
-                    top: currOriImgData.perCropPos[0] * containerSize[1],
-                    left: currOriImgData.perCropPos[1] * containerSize[0],
-                  }}
-                  onMouseDown={handleMoveCropper}
-                >
-                  <div ref={gridRef} className="size-full hidden grid-cols-3">
-                    <div className="border-r border-b border-sky-100/50"></div>
-                    <div className="border border-t-0 border-sky-100/50"></div>
-                    <div className="border-l border-b border-sky-100/50"></div>
-                    <div className="border border-l-0 border-sky-100/50"></div>
-                    <div className="border border-sky-100/50"></div>
-                    <div className="border border-r-0 border-sky-100/50"></div>
-                    <div className="border-t border-r border-sky-100/50"></div>
-                    <div className="border border-b-0 border-sky-100/50"></div>
-                    <div className="border-t border-l border-sky-100/50"></div>
+                <div className="flex flex-col">
+                  <div
+                    ref={topDivRef}
+                    className="absolute top-0 bg-neutral-950/75"
+                    style={{
+                      width:
+                        currOriImgData.perCropSize[0] * imgContainerSize[0],
+                      height:
+                        currOriImgData.perCropPos[0] * imgContainerSize[1],
+                      left: currOriImgData.perCropPos[1] * imgContainerSize[0],
+                    }}
+                  ></div>
+                  <div
+                    ref={cropperRef}
+                    className="absolute cursor-grab border-2 border-sky-100/75 z-10"
+                    style={{
+                      width:
+                        currOriImgData.perCropSize[0] * imgContainerSize[0],
+                      aspectRatio,
+                      top: currOriImgData.perCropPos[0] * imgContainerSize[1],
+                      left: currOriImgData.perCropPos[1] * imgContainerSize[0],
+                    }}
+                    onMouseDown={handleMoveCropper}
+                  >
+                    <div ref={gridRef} className="size-full hidden grid-cols-3">
+                      <div className="border-r border-b border-sky-100/50"></div>
+                      <div className="border border-t-0 border-sky-100/50"></div>
+                      <div className="border-l border-b border-sky-100/50"></div>
+                      <div className="border border-l-0 border-sky-100/50"></div>
+                      <div className="border border-sky-100/50"></div>
+                      <div className="border border-r-0 border-sky-100/50"></div>
+                      <div className="border-t border-r border-sky-100/50"></div>
+                      <div className="border border-b-0 border-sky-100/50"></div>
+                      <div className="border-t border-l border-sky-100/50"></div>
+                    </div>
+                    <div
+                      ref={topLeftCornerRef}
+                      className="absolute top-0 -left-[1px] bottom-0 cursor-ew-resize"
+                      onMouseDown={(e) => {
+                        handleResizeCropper("left");
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-full"></div>
+                    </div>
+                    <div
+                      className="absolute top-0 -right-[1px] bottom-0 cursor-ew-resize"
+                      onMouseDown={(e) => {
+                        handleResizeCropper("right");
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-md"></div>
+                    </div>
                   </div>
                   <div
-                    ref={topLeftCornerRef}
-                    className="absolute top-0 -left-[1px] bottom-0 cursor-ew-resize"
-                    onMouseDown={(e) => {
-                      handleResizeCropper("left");
-                      e.stopPropagation();
+                    ref={bottomDivRef}
+                    className="absolute bottom-0 bg-neutral-950/75"
+                    style={{
+                      width:
+                        currOriImgData.perCropSize[0] * imgContainerSize[0],
+                      height:
+                        imgContainerSize[1] -
+                        currOriImgData.perCropPos[0] * imgContainerSize[1] -
+                        currOriImgData.perCropSize[1] * imgContainerSize[1],
+                      left: currOriImgData.perCropPos[1] * imgContainerSize[0],
                     }}
-                  >
-                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-full"></div>
-                  </div>
-                  <div
-                    className="absolute top-0 -right-[1px] bottom-0 cursor-ew-resize"
-                    onMouseDown={(e) => {
-                      handleResizeCropper("right");
-                      e.stopPropagation();
-                    }}
-                  >
-                    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-md"></div>
-                  </div>
+                  ></div>
                 </div>
                 <div
-                  ref={bottomDivRef}
-                  className="absolute bottom-0 bg-neutral-950/75"
+                  ref={rightDivRef}
+                  className="absolute top-0 right-0 h-full bg-neutral-950/75"
                   style={{
-                    width: currOriImgData.perCropSize[0] * containerSize[0],
-                    height:
-                      containerSize[1] -
-                      currOriImgData.perCropPos[0] * containerSize[1] -
-                      currOriImgData.perCropSize[1] * containerSize[1],
-                    left: currOriImgData.perCropPos[1] * containerSize[0],
+                    width:
+                      imgContainerSize[0] -
+                      currOriImgData.perCropPos[1] * imgContainerSize[0] -
+                      currOriImgData.perCropSize[0] * imgContainerSize[0],
                   }}
                 ></div>
               </div>
-              <div
-                ref={rightDivRef}
-                className="absolute top-0 right-0 h-full bg-neutral-950/75"
-                style={{
-                  width:
-                    containerSize[0] -
-                    currOriImgData.perCropPos[1] * containerSize[0] -
-                    currOriImgData.perCropSize[0] * containerSize[0],
-                }}
-              ></div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

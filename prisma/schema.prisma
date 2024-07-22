@@ -28,7 +28,7 @@ model Image {
 }
 
 model Post {
-  id                               String     @id
+  id                               String     @id @default(cuid())
   authorId                         String
   hideLikeCounts                   Boolean
   turnOffCmt                       Boolean
@@ -36,7 +36,7 @@ model Post {
   aspectRatio                      Float
   createdAt                        DateTime   @default(now())
   imagesUrl                        String[]
-  updatedAt                        DateTime
+  updatedAt                        DateTime   @updatedAt
   Comment                          Comment[]
   Image                            Image[]
   UserInfo_Post_authorIdToUserInfo UserInfo   @relation("Post_authorIdToUserInfo", fields: [authorId], references: [id])

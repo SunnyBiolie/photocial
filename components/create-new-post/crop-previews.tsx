@@ -1,10 +1,10 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { ButtonChangeImage } from "../btn-change-image";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { Loading } from "../loading";
-import { DotQueue } from "../dot-queue";
+import { cn } from "@/lib/utils";
+import { DotQueue } from "../others/dot-queue";
+import { Loading } from "../others/loading";
+import { ButtonChangeImage } from "../others/btn-change-image";
 
 export const CropPreviews = () => {
   const {
@@ -20,7 +20,7 @@ export const CropPreviews = () => {
   const currImgPreCropData = arrImgPreCropData[currentIndex];
 
   return (
-    <div className="relative size-[475px] shrink-0 flex items-center justify-center bg-slate-950/50 overflow-hidden">
+    <div className="relative w-full aspect-square flex items-center justify-center bg-neutral-950/75 backdrop-blur-sm overflow-hidden md:w-[475px]">
       <div
         className={cn(
           "relative transition-all duration-300 ease-out",

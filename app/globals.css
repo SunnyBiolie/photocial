@@ -17,17 +17,6 @@ body {
   --app-navbar-horizontal-height: 68px;
 }
 
-@keyframes display-backdrop-blur {
-  0% {
-    opacity: 0;
-    backdrop-filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    backdrop-filter: blur(40px);
-  }
-}
-
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

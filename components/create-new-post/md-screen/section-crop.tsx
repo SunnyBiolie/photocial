@@ -1,14 +1,14 @@
 "use client";
 
 import { toast } from "sonner";
+import { createArrayCroppedImage } from "../utils";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { createArrayCroppedImage } from "./utils";
-import { StateHeader } from "./state-header";
+import { StateHeader } from "../state-header";
+import { CropParameters_MD } from "./crop-parameters";
+import { CropPreviews } from "../crop-previews";
 import { HiArrowLeft } from "react-icons/hi";
-import { CropPreviews } from "./crop-previews";
-import { CropParameters } from "./crop-parameters";
 
-export const CNP_SectionCrop = () => {
+export const CNP_SectionCrop_MD = () => {
   const {
     setImageFiles,
     setState,
@@ -38,9 +38,8 @@ export const CNP_SectionCrop = () => {
       toast.error(`"arrImgPreCropData" is not defined!`);
     }
   };
-
   return (
-    <div className="w-[min(100vw-16px,475px)] animate-fade-in">
+    <div className="animate-fade-in">
       <StateHeader
         tilte="Crop"
         LeftBtn={HiArrowLeft}
@@ -49,8 +48,10 @@ export const CNP_SectionCrop = () => {
         rightBtn="Next"
         handleRightBtn={hanldeNextStep}
       />
-      <CropPreviews />
-      <CropParameters />
+      <div className="relative flex">
+        <CropPreviews />
+        <CropParameters_MD />
+      </div>
     </div>
   );
 };

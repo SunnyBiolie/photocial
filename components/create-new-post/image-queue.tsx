@@ -1,38 +1,39 @@
+"use client";
+
 import {
-  CSSProperties,
   Dispatch,
   ElementRef,
-  MouseEvent as ReactMouseEvent,
+  MouseEvent,
   SetStateAction,
   useEffect,
   useRef,
   useState,
 } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
-import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { configValues } from "./container";
-import { checkNewImagesValid } from "./utils";
-import { GoPlus } from "react-icons/go";
-import { IoClose } from "react-icons/io5";
+import { configCreateNewPost } from "@/photocial.config";
 import { ImgPreCropData } from "@/types/create-post-types";
+import { useCreateNewPost } from "@/hooks/use-create-new-post";
+import { checkNewImagesValid } from "./utils";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 
-const itemSize = 80;
-const spaceX = 8;
-const itemTotalWidth = itemSize + spaceX;
+type ScrollInfor = {
+  isScrollLeft: boolean;
+  isScrollRight: boolean;
+};
 
 export const ImageQueue = () => {
-  const {
-    imageFiles,
-    setImageFiles,
-    currentIndex,
-    setCurrentIndex,
-    arrImgPreCropData,
-  } = useCreateNewPost();
+  const { imageFiles, setImageFiles, setCurrentIndex, arrImgPreCropData } =
+    useCreateNewPost();
 
   const inputRef = useRef<ElementRef<"input">>(null);
+  const containerRef = useRef<ElementRef<"div">>(null);
   const queueContainerRef = useRef<ElementRef<"div">>(null);
 
-  const [containerLeft, setContainerLeft] = useState<number>();
+  const [scrollInfo, setScrollInfo] = useState<ScrollInfor>({
+    isScrollLeft: false,
+    isScrollRight: false,
+  });
 
   useEffect(() => {
     const inputTarget = inputRef.current;
@@ -43,8 +44,8 @@ export const ImageQueue = () => {
 
           const { validFiles, typeError, sizeError } = checkNewImagesValid(
             files,
-            configValues.maxImageFiles - imageFiles.length,
-            configValues.limitSize
+            configCreateNewPost.maxImageFiles - imageFiles.length,
+            configCreateNewPost.limitSize
           );
 
           if (typeError || sizeError) {
@@ -56,7 +57,7 @@ export const ImageQueue = () => {
 
             if (sizeError) {
               toast.error("This file is too large", {
-                description: `"${sizeError}" is bigger than ${configValues.limitSize}MB and could not be uploaded.`,
+                description: `"${sizeError}" is bigger than ${configCreateNewPost.limitSize}MB and could not be uploaded.`,
               });
             }
           } else {
@@ -85,127 +86,144 @@ export const ImageQueue = () => {
         inputTarget.onchange = null;
       };
     }
-    // Nếu không chạy lại mỗi khi imageFiles thay đổi thì imageFiles trong useEffect sẽ không bao giờ được cập nhật
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageFiles]);
 
   useEffect(() => {
-    const containerTarget = queueContainerRef.current;
+    const containerTarget = containerRef.current;
+    const queueContainerTarget = queueContainerRef.current;
+    if (queueContainerTarget && containerTarget) {
+      if (queueContainerTarget.scrollWidth > containerTarget.offsetWidth) {
+        setScrollInfo((prev) => {
+          if (queueContainerTarget.scrollLeft === 0) {
+            prev.isScrollLeft = false;
+          } else {
+            prev.isScrollLeft = true;
+          }
+          if (queueContainerTarget.scrollLeft === containerTarget.scrollWidth) {
+            prev.isScrollRight = false;
+          } else {
+            prev.isScrollRight = true;
+          }
 
-    if (!containerTarget || !arrImgPreCropData) return;
-
-    let newContainerLeft = 0;
-
-    const containerWidth = containerTarget.offsetWidth;
-
-    const lastRest = itemTotalWidth - (containerWidth % itemTotalWidth);
-
-    // Ảnh chưa đạt số lượng tối đa - Nút thêm chưa được ẩn
-    if (arrImgPreCropData.length !== configValues.maxImageFiles) {
-      switch (currentIndex) {
-        case 0:
-        case 1:
-          newContainerLeft = 0;
-          break;
-        case arrImgPreCropData.length - 1:
-          newContainerLeft = (2 - currentIndex) * itemTotalWidth - lastRest;
-          break;
-        default:
-          newContainerLeft = (1 - currentIndex) * itemTotalWidth;
-          break;
-      }
-    } else {
-      switch (currentIndex) {
-        case 0:
-        case 1:
-          newContainerLeft = 0;
-          break;
-        case arrImgPreCropData.length - 2:
-        case arrImgPreCropData.length - 1:
-          newContainerLeft =
-            (4 - arrImgPreCropData.length) * itemTotalWidth - lastRest;
-          break;
-        default:
-          newContainerLeft = (1 - currentIndex) * itemTotalWidth;
-          break;
+          return { ...prev };
+        });
+      } else {
+        setScrollInfo({
+          isScrollLeft: false,
+          isScrollRight: false,
+        });
       }
     }
-
-    setContainerLeft(newContainerLeft);
-  }, [currentIndex, arrImgPreCropData]);
+  }, [arrImgPreCropData]);
 
   if (!imageFiles || !arrImgPreCropData) return;
 
   const hanldeAddImage = () => {
     const inputTarget = inputRef.current;
-    if (!inputTarget) return;
-    if (imageFiles.length < configValues.maxImageFiles) {
+    if (inputTarget && imageFiles.length < configCreateNewPost.maxImageFiles) {
       inputTarget.click();
     }
   };
 
-  return (
-    <>
-      <div className="flex items-center gap-4">
-        <div
-          ref={queueContainerRef}
-          className="relative w-full overflow-hidden"
-          style={{ height: itemSize + "px" }}
-        >
-          {containerLeft !== undefined && (
-            <div
-              className="size-full absolute transition-all duration-300"
-              style={{
-                transform: `translateX(${containerLeft}px)`,
-              }}
-            >
-              {arrImgPreCropData.map((imgData, index) => (
-                <ImageQueueItem
-                  imgPreCropData={imgData}
-                  key={index}
-                  index={index}
-                  style={{
-                    left: `${index * itemTotalWidth}px`,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-        {imageFiles.length < configValues.maxImageFiles && (
-          <div className="shrink-0 relative w-12 h-full flex items-center justify-center">
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-            />
+  const handleScroll = (action: "prev" | "next") => {
+    const containerTarget = containerRef.current;
+    const queueContainerTarget = queueContainerRef.current;
+    if (queueContainerTarget && containerTarget) {
+      let space =
+        action === "prev"
+          ? -containerTarget.offsetWidth
+          : containerTarget.offsetWidth;
 
-            <div
-              className="bg-dark_3 rounded-full overflow-hidden cursor-pointer hover:bg-light_3"
-              onClick={hanldeAddImage}
-            >
-              <GoPlus className="size-8 m-2" />
-            </div>
+      setScrollInfo((prev) => {
+        if (Math.round(queueContainerTarget.scrollLeft + space) <= 0) {
+          prev.isScrollLeft = false;
+        } else {
+          prev.isScrollLeft = true;
+        }
+        if (
+          Math.round(queueContainerTarget.scrollLeft + space * 2) >=
+          queueContainerTarget.scrollWidth
+        ) {
+          prev.isScrollRight = false;
+        } else {
+          prev.isScrollRight = true;
+        }
+
+        return { ...prev };
+      });
+
+      queueContainerTarget.scroll({
+        left: queueContainerTarget.scrollLeft + space,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <div className="flex p-3 gap-x-3">
+      <div ref={containerRef} className="flex-1 relative overflow-hidden">
+        <div ref={queueContainerRef} className="overflow-hidden">
+          <div className="flex gap-x-2">
+            {arrImgPreCropData.map((item, index) => (
+              <ImageQueueItem
+                key={item.id}
+                imgPreCropData={item}
+                index={index}
+                setScrollInfo={setScrollInfo}
+                containerTarget={containerRef.current}
+                queueContainerTarget={queueContainerRef.current}
+              />
+            ))}
           </div>
+        </div>
+        {scrollInfo.isScrollLeft && (
+          <button
+            className="absolute top-1/2 left-1 -translate-y-1/2 p-1 bg-normal opacity-50 rounded-full overflow-hidden transition-all hover:opacity-75"
+            onClick={() => handleScroll("prev")}
+          >
+            <ChevronLeft className="text-jet size-4" />
+          </button>
+        )}
+        {scrollInfo.isScrollRight && (
+          <button
+            className="absolute top-1/2 right-1 -translate-y-1/2 p-1 bg-normal opacity-50 rounded-full overflow-hidden transition-all hover:opacity-75"
+            onClick={() => handleScroll("next")}
+          >
+            <ChevronRight className="text-jet size-4" />
+          </button>
         )}
       </div>
-    </>
+      {imageFiles.length < configCreateNewPost.maxImageFiles && (
+        <div className="shrink-0 flex items-center justify-center">
+          <input ref={inputRef} type="file" accept="image/*" multiple hidden />
+          <div
+            className="p-2 rounded-full cursor-pointer dark:hover:bg-neutral-500/50 transition-all"
+            onClick={hanldeAddImage}
+          >
+            <Plus />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-interface ImageQueueItemProps {
+interface ItemProps {
   imgPreCropData: ImgPreCropData;
   index: number;
-  style?: CSSProperties;
+  setScrollInfo: Dispatch<SetStateAction<ScrollInfor>>;
+  containerTarget: HTMLDivElement | null;
+  queueContainerTarget: HTMLDivElement | null;
 }
 
 const ImageQueueItem = ({
   imgPreCropData,
   index,
-  style,
-}: ImageQueueItemProps) => {
+  setScrollInfo,
+  containerTarget,
+  queueContainerTarget,
+}: ItemProps) => {
   const {
     setState,
     imageFiles,
@@ -220,7 +238,6 @@ const ImageQueueItem = ({
       if (currentIndex === imageFiles.length - 1)
         setCurrentIndex((prev) => Math.max(0, prev - 1));
       if (imageFiles.length === 1) {
-        setState("se");
         setImageFiles(undefined);
       } else
         setImageFiles((prev) => {
@@ -229,45 +246,72 @@ const ImageQueueItem = ({
     }
   };
 
-  const handleOnClick = () => {
-    setCurrentIndex(index);
+  const handleOnClick = (
+    e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+  ) => {
+    if (queueContainerTarget && containerTarget) {
+      const newScrollLeft =
+        e.currentTarget.offsetLeft - e.currentTarget.offsetWidth;
+      queueContainerTarget.scrollTo({
+        left: newScrollLeft,
+        behavior: "smooth",
+      });
+      setCurrentIndex(index);
+
+      console.log(newScrollLeft);
+      setScrollInfo((prev) => {
+        if (Math.round(newScrollLeft) <= 0) {
+          prev.isScrollLeft = false;
+        } else {
+          prev.isScrollLeft = true;
+        }
+        if (
+          Math.round(newScrollLeft + containerTarget.offsetWidth) >=
+          queueContainerTarget.scrollWidth
+        ) {
+          prev.isScrollRight = false;
+        } else {
+          prev.isScrollRight = true;
+        }
+
+        return { ...prev };
+      });
+    }
   };
 
   return (
-    <>
-      {
+    <div
+      className="shrink-0 relative size-28 rounded-sm overflow-hidden cursor-pointer"
+      onClick={handleOnClick}
+    >
+      <Image
+        src={imgPreCropData.originURL}
+        alt=""
+        fill
+        sizes="auto"
+        className="object-cover"
+      />
+      {index === currentIndex ? (
         <div
-          className="absolute top-1/2 -translate-y-1/2 bg-dark_3 rounded-sm overflow-hidden cursor-pointer transition-all duration-300 animate-fade-in"
-          style={{ width: itemSize + "px", height: itemSize + "px", ...style }}
-          onClick={handleOnClick}
+          className="absolute top-1.5 right-1.5 p-1.5 rounded-full cursor-pointer dark:bg-neutral-800/75"
+          onClick={() =>
+            setDialog({
+              title: "Discard photo?",
+              message: "This will remove the photo from your post.",
+              acceptText: "Discard",
+              handleAccept: () => {
+                handleRemoveImage();
+                setDialog(undefined);
+              },
+              handleCancel: () => setDialog(undefined),
+            })
+          }
         >
-          <div
-            style={{ backgroundImage: `url("${imgPreCropData.originURL}")` }}
-            className="size-full bg-neutral-700/75 bg-cover bg-no-repeat bg-center"
-          />
-          {index === currentIndex ? (
-            <div
-              className="absolute top-1 right-1 p-1 rounded-full bg-neutral-800/75 cursor-pointer"
-              onClick={() =>
-                setDialog({
-                  title: "Discard photo?",
-                  message: "This will remove the photo from your post.",
-                  acceptText: "Discard",
-                  handleAccept: () => {
-                    handleRemoveImage();
-                    setDialog(undefined);
-                  },
-                  handleCancel: () => setDialog(undefined),
-                })
-              }
-            >
-              <IoClose className="size-4" />
-            </div>
-          ) : (
-            <div className="absolute size-full top-0 left-0 bg-slate-800/60" />
-          )}
+          <X className="size-4" />
         </div>
-      }
-    </>
+      ) : (
+        <div className="absolute size-full top-0 left-0 dark:bg-neutral-950/50" />
+      )}
+    </div>
   );
 };

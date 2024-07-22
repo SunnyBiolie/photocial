@@ -2,29 +2,27 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { StateHeader } from "./state-header";
-import { FinalPreviews } from "./final-previews";
-import { HiArrowLeft } from "react-icons/hi";
-import { IoIosArrowUp } from "react-icons/io";
-import { ToggleButton } from "../toggle-button";
-import { createPost } from "@/action/create-post";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { createNewPost } from "@/action/post/create";
+import { useCreateNewPost } from "@/hooks/use-create-new-post";
 import { useUserInfo } from "@/hooks/use-user-info";
-import { PostCaption } from "./post-caption";
+import { StateHeader } from "../state-header";
+import { FinalPreviews } from "../final-previews";
+import { FinalMoreSettings } from "../final-more-settings";
+import { PostCaption } from "../post-caption";
+import { HiArrowLeft } from "react-icons/hi";
 
-type PostSettings = {
+export type PostSettings = {
   hideLikeCounts: boolean;
   turnOffCmt: boolean;
 };
 
-export const CreatePostFinalState = () => {
-  const router = useRouter();
-
+export const CNP_FinalState_MD = () => {
   const { userInfo } = useUserInfo();
+
   const {
     setState,
+    setImageFiles,
     arrCroppedImgData,
     setArrCroppedImgData,
     aspectRatio,
@@ -72,7 +70,7 @@ export const CreatePostFinalState = () => {
         arrCroppedImgData.forEach((item) => {
           listImagesData.push(item.bytes);
         });
-        const res = await createPost(
+        const res = await createNewPost(
           aspectRatio,
           listImagesData,
           caption,
@@ -87,7 +85,7 @@ export const CreatePostFinalState = () => {
         setDialog(undefined);
 
         if (type === "success") {
-          router.push("/");
+          setImageFiles(undefined);
         } else if (type === "error") {
         }
       },
@@ -96,7 +94,7 @@ export const CreatePostFinalState = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in md:w-auto md:aspect-auto">
       <StateHeader
         tilte="Create new post"
         LeftBtn={HiArrowLeft}
@@ -105,73 +103,30 @@ export const CreatePostFinalState = () => {
         rightBtn="Share"
         handleRightBtn={handleSharePost}
       />
-      <div className="flex">
+      <div className="w-[min(100vw-16px,475px)] aspect-square overflow-auto flex flex-col md:w-auto md:aspect-auto md:flex-row">
         <FinalPreviews />
-        <div className="flex-1 w-[325px] bg-dark_2">
+        <div className="flex-1 order-first w-full bg-[rgb(32,32,32)] md:order-none md:w-[325px]">
           <div className="flex items-center gap-x-3 my-4 mx-4">
             <div className="relative size-7 rounded-full overflow-hidden">
               <Image
                 src={userInfo?.imageUrl || ""}
                 alt=""
                 fill
+                sizes="auto"
                 className="object-cover"
               />
             </div>
-            <span className="text-sm font-semibold">@{userInfo?.userName}</span>
+            <span className="text-sm font-semibold">{userInfo?.userName}</span>
           </div>
           <PostCaption
             caption={caption}
             setCaption={setCaption}
             className="px-5 text-sm"
           />
-          <div className="mx-4">
-            <div className="font-semibold py-2 mb-1 flex items-center justify-between">
-              <span>Other settings</span>
-              <IoIosArrowUp className="size-5" />
-            </div>
-            <div className="space-y-2">
-              <div>
-                <div className="flex items-center gap-x-2">
-                  <ToggleButton
-                    defaultValue={postSettings.hideLikeCounts}
-                    doWhenCheck={() =>
-                      setPostSettings((prev) => {
-                        prev.hideLikeCounts = true;
-                        return prev;
-                      })
-                    }
-                    doWhenNotCheck={() =>
-                      setPostSettings((prev) => {
-                        prev.hideLikeCounts = false;
-                        return prev;
-                      })
-                    }
-                  />
-                  <span className="text-sm">Hide like counts on this post</span>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-x-2">
-                  <ToggleButton
-                    defaultValue={postSettings.turnOffCmt}
-                    doWhenCheck={() =>
-                      setPostSettings((prev) => {
-                        prev.turnOffCmt = true;
-                        return prev;
-                      })
-                    }
-                    doWhenNotCheck={() =>
-                      setPostSettings((prev) => {
-                        prev.turnOffCmt = false;
-                        return prev;
-                      })
-                    }
-                  />
-                  <span className="text-sm">Turn off commenting</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <FinalMoreSettings
+            postSettings={postSettings}
+            setPostSettings={setPostSettings}
+          />
         </div>
       </div>
     </div>

@@ -16,21 +16,16 @@ import {
   ImageFile,
 } from "@/types/create-post-types";
 import { defaultPercSizeAndPos } from "./utils";
-import { CreatePostInput } from "./section-input";
-import { CreatePostAdvancedCrop } from "./section-advanced-crop";
-import { CreatePostCrop } from "./section-crop";
-import { CreatePostFinalState } from "./section-final";
+import { CNP_SectionInput_MD } from "./section-input";
+import { CNP_AdvancedCrop_MD } from "./md-screen/section-advanced-crop";
+import { CNP_SectionCrop_MD } from "./md-screen/section-crop";
+import { CNP_FinalState_MD } from "./md-screen/section-final";
 import { Dialog, DialogProps } from "./dialog";
+import { configCreateNewPost } from "@/photocial.config";
+import { ButtonCloseFullView } from "../others/btn-close-full-view";
+import { CNP_SectionCrop } from "./section-crop";
 
-export const configValues = {
-  defCurrIndex: 0,
-  defDirection: "vertical" as Direction,
-  defAspectRatio: 1 as AspectRatio,
-  maxImageFiles: 8,
-  limitSize: 10,
-};
-
-type CreatePostContainerContextType = {
+type CreateNewPostContextType = {
   setState: Dispatch<SetStateAction<CreatePostState>>;
   imageFiles: ImageFile[] | undefined;
   setImageFiles: Dispatch<SetStateAction<ImageFile[] | undefined>>;
@@ -47,23 +42,35 @@ type CreatePostContainerContextType = {
   setDialog: Dispatch<SetStateAction<DialogProps | undefined>>;
 };
 
-export const CreatePostContainerContext = createContext<
-  CreatePostContainerContextType | undefined
+export const CreateNewPostContext = createContext<
+  CreateNewPostContextType | undefined
 >(undefined);
 
-export const CreatePostContainer = () => {
+interface Props {
+  isShow: boolean;
+  setIsShow: Dispatch<SetStateAction<boolean>>;
+  isDisplayVertical: boolean;
+}
+
+export const CreateNewPost = ({
+  isShow,
+  setIsShow,
+  isDisplayVertical,
+}: Props) => {
   const [state, setState] = useState<CreatePostState>("se");
   const [imageFiles, setImageFiles] = useState<ImageFile[]>();
   const [arrImgPreCropData, setArrImgPreCropData] =
     useState<ImgPreCropData[]>();
   const [arrCroppedImgData, setArrCroppedImgData] =
     useState<ImgCroppedData[]>();
-  const [currentIndex, setCurrentIndex] = useState(configValues.defCurrIndex);
+  const [currentIndex, setCurrentIndex] = useState(
+    configCreateNewPost.defCurrIndex
+  );
   const [direction, setDirection] = useState<Direction>(
-    configValues.defDirection
+    configCreateNewPost.defDirection
   );
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(
-    configValues.defAspectRatio
+    configCreateNewPost.defAspectRatio
   );
 
   const [dialog, setDialog] = useState<DialogProps>();
@@ -79,9 +86,9 @@ export const CreatePostContainer = () => {
       setState("se");
       setArrImgPreCropData(undefined);
       setArrCroppedImgData(undefined);
-      setCurrentIndex(configValues.defCurrIndex);
-      setDirection(configValues.defDirection);
-      setAspectRatio(configValues.defAspectRatio);
+      setCurrentIndex(configCreateNewPost.defCurrIndex);
+      setDirection(configCreateNewPost.defDirection);
+      setAspectRatio(configCreateNewPost.defAspectRatio);
     } else {
       setState("ar");
 
@@ -160,8 +167,10 @@ export const CreatePostContainer = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageFiles]);
 
+  if (!isShow) return;
+
   return (
-    <CreatePostContainerContext.Provider
+    <CreateNewPostContext.Provider
       value={{
         setState,
         imageFiles,
@@ -179,58 +188,74 @@ export const CreatePostContainer = () => {
         setDialog,
       }}
     >
-      <div className="shrink-0 overflow-hidden">
-        {state === "se" && !imageFiles ? (
-          <CreatePostInput />
-        ) : (
-          imageFiles &&
-          arrImgPreCropData && (
-            <>
-              <div className="p-8 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                <div className="flex flex-col rounded-md overflow-hidden ">
-                  {state === "ar" && <CreatePostCrop />}
-                  {state === "cr" && <CreatePostAdvancedCrop />}
-                  {state === "in" && <CreatePostFinalState />}
+      <div className="fixed top-0 left-0 size-full animate-fade-in">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-auto flex flex-col z-10 ">
+          {state === "se" && !imageFiles ? (
+            <CNP_SectionInput_MD />
+          ) : (
+            imageFiles &&
+            (arrImgPreCropData ? (
+              <>
+                <div className="flex-1 md:p-8">
+                  <div className="relative size-full rounded-xl md:max-w-[800px] md:rounded-md overflow-hidden">
+                    {state === "ar" ? (
+                      isDisplayVertical ? (
+                        <CNP_SectionCrop_MD />
+                      ) : (
+                        <CNP_SectionCrop />
+                      )
+                    ) : state === "cr" ? (
+                      <CNP_AdvancedCrop_MD />
+                    ) : (
+                      state === "in" && <CNP_FinalState_MD />
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div
-                className="fixed size-full top-0 left-0 bg-neutral-950/60 z-10"
-                onClick={() =>
-                  setDialog({
-                    title: "Discard post?",
-                    message: "If you leave, your edits won't be saved.",
-                    acceptText: "Discard",
-                    handleAccept: () => {
-                      setState("se");
-                      setImageFiles(undefined);
-                      arrCroppedImgData?.forEach((item) => {
-                        URL.revokeObjectURL(item.croppedURL);
-                      });
-                      setArrCroppedImgData(undefined);
-                      setDialog(undefined);
-                    },
-                    handleCancel: () => setDialog(undefined),
-                  })
-                }
-              />
-              {dialog && (
-                <Dialog
-                  title={dialog.title}
-                  message={dialog.message}
-                  type={dialog.type}
-                  acceptText={dialog.acceptText}
-                  handleAccept={dialog.handleAccept}
-                  handleAcceptWithLoadingState={
-                    dialog.handleAcceptWithLoadingState
-                  }
-                  handleLoadingDone={dialog.handleLoadingDone}
-                  handleCancel={dialog.handleCancel}
-                />
-              )}
-            </>
-          )
+              </>
+            ) : (
+              "Loading"
+            ))
+          )}
+        </div>
+        <div
+          className="absolute size-full top-0 left-0 dark:bg-neutral-950/75 backdrop-blur-sm"
+          onClick={() => {
+            if (state === "se") {
+              setIsShow(false);
+            } else {
+              setDialog({
+                title: "Discard post?",
+                message: "If you leave, your edits won't be saved.",
+                acceptText: "Discard",
+                handleAccept: () => {
+                  setIsShow(false);
+                  setImageFiles(undefined);
+                  arrCroppedImgData?.forEach((item) => {
+                    URL.revokeObjectURL(item.croppedURL);
+                  });
+                  setArrCroppedImgData(undefined);
+                  setDialog(undefined);
+                },
+                handleCancel: () => setDialog(undefined),
+              });
+            }
+          }}
+        >
+          <ButtonCloseFullView />
+        </div>
+        {dialog && (
+          <Dialog
+            title={dialog.title}
+            message={dialog.message}
+            type={dialog.type}
+            acceptText={dialog.acceptText}
+            handleAccept={dialog.handleAccept}
+            handleAcceptWithLoadingState={dialog.handleAcceptWithLoadingState}
+            handleLoadingDone={dialog.handleLoadingDone}
+            handleCancel={dialog.handleCancel}
+          />
         )}
       </div>
-    </CreatePostContainerContext.Provider>
+    </CreateNewPostContext.Provider>
   );
 };

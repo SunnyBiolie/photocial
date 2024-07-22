@@ -1,13 +1,13 @@
 "use client";
 
 import { ElementRef, useEffect, useRef, useState } from "react";
-import { configValues } from "./container";
+import { configCreateNewPost } from "@/photocial.config";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
 import { checkNewImagesValid } from "./utils";
-import { IoImagesOutline } from "react-icons/io5";
 import { BsExclamationCircle } from "react-icons/bs";
+import { ImagePlus } from "lucide-react";
 
-export const CreatePostInput = () => {
+export const CNP_SectionInput_MD = () => {
   const { imageFiles, setImageFiles } = useCreateNewPost();
 
   const inputFileRef = useRef<ElementRef<"input">>(null);
@@ -30,8 +30,8 @@ export const CreatePostInput = () => {
 
           const { validFiles, typeError, sizeError } = checkNewImagesValid(
             files,
-            configValues.maxImageFiles,
-            configValues.limitSize
+            configCreateNewPost.maxImageFiles,
+            configCreateNewPost.limitSize
           );
 
           if (typeError || sizeError) {
@@ -45,7 +45,7 @@ export const CreatePostInput = () => {
             if (sizeError) {
               setError({
                 title: "This file is too large",
-                message: `"${sizeError}" is bigger than ${configValues.limitSize}MB and could not be uploaded.`,
+                message: `"${sizeError}" is bigger than ${configCreateNewPost.limitSize}MB and could not be uploaded.`,
               });
             }
 
@@ -71,18 +71,18 @@ export const CreatePostInput = () => {
 
       dropZoneTarget.ondragover = (e) => {
         e.preventDefault();
-        dropZoneTarget.classList.remove("border-dark_3");
-        dropZoneTarget.classList.add("border-light_3");
+        dropZoneTarget.classList.remove("border-unselected");
+        dropZoneTarget.classList.add("border-normal");
       };
       dropZoneTarget.ondragleave = (e) => {
         e.preventDefault();
-        dropZoneTarget.classList.add("border-dark_3");
-        dropZoneTarget.classList.remove("border-light_3");
+        dropZoneTarget.classList.add("border-unselected");
+        dropZoneTarget.classList.remove("border-normal");
       };
       dropZoneTarget.ondrop = (e) => {
         e.preventDefault();
-        dropZoneTarget.classList.add("border-dark_3");
-        dropZoneTarget.classList.remove("border-light_3");
+        dropZoneTarget.classList.add("border-unselected");
+        dropZoneTarget.classList.remove("border-normal");
 
         const fileList = e.dataTransfer?.files;
         if (fileList) {
@@ -90,8 +90,8 @@ export const CreatePostInput = () => {
 
           const { validFiles, typeError, sizeError } = checkNewImagesValid(
             files,
-            configValues.maxImageFiles,
-            configValues.limitSize
+            configCreateNewPost.maxImageFiles,
+            configCreateNewPost.limitSize
           );
 
           if (typeError || sizeError) {
@@ -143,38 +143,36 @@ export const CreatePostInput = () => {
   if (imageFiles) throw new Error("Already has file(s)");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 p-8">
       <input ref={inputFileRef} type="file" accept="image/*" multiple hidden />
+      <h6 className="text-center font-bold">Create new post</h6>
       <div
         ref={dropZoneRef}
-        className="size-[475px] flex flex-col items-center justify-center gap-y-4 p-4 font-medium rounded-lg border-2 border-dashed border-dark_3 text-light_1"
+        className="size-[min(100vw-16px,420px)] flex flex-col items-center justify-center gap-y-4 p-4 rounded-lg border border-dashed border-unselected overflow-hidden dark:bg-neutral-900 shadow-md"
       >
         {!error ? (
           <>
-            <IoImagesOutline className="size-12" />
-            <p>Drag and drop photos here</p>
+            <div className="p-6 w-fit rounded-full dark:text-neutral-500 border dark:border-neutral-500">
+              <ImagePlus strokeWidth={1} className="size-10" />
+            </div>
+            <p className="text-lg">Drag and drop photos here</p>
           </>
         ) : (
           <>
             <BsExclamationCircle className="size-16" />
             <p className="text-lg">{error.title}</p>
-            <p className="text-sm text-center font-normal px-2">
-              {error.message}
-            </p>
+            <p className="text-sm text-center px-2">{error.message}</p>
           </>
         )}
         <button
           ref={selectImageRef}
-          className="py-2 px-4 mt-4 rounded-md bg-slate-200 text-dark_3"
+          className="py-1 px-8 mt-4 rounded-lg dark:text-neutral-700 dark:bg-neutral-300"
         >
-          {!error ? "Select photos" : "Select other files"}
+          <span className="text-sm dark:font-medium">
+            {!error ? "Select from computer" : "Select other files"}
+          </span>
         </button>
       </div>
-      {/* <div className="w-[475px] text-sm text-slate-400">
-        Each new post only allows a maximum of 6 files, files in image format
-        (image/*) and capacity not exceeding 15 MB. Files that do not meet the
-        requirements will not be added.
-      </div> */}
     </div>
   );
 };

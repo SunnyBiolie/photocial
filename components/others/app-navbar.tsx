@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
@@ -21,6 +21,8 @@ import { BiHomeAlt2 } from "react-icons/bi";
 import { ItemPopup } from "./item-popup";
 
 interface Props {
+  isDisplayVertical: boolean | undefined;
+  setIsCreatingNewPost: Dispatch<SetStateAction<boolean>>;
   className?: string;
 }
 
@@ -31,30 +33,14 @@ export interface NavItem {
   Icon: IconType | LucideIcon;
 }
 
-export const AppNavigationBar = ({ className }: Props) => {
+export const AppNavigationBar = ({
+  isDisplayVertical,
+  setIsCreatingNewPost,
+  className,
+}: Props) => {
   const { user } = useUser();
 
   const pathname = usePathname();
-
-  const [isDisplayVertical, setIsDisplayVertical] = useState<boolean>();
-
-  useEffect(() => {
-    const handleDisplayStyle = () => {
-      if (window.innerWidth >= 768) {
-        setIsDisplayVertical(true);
-      } else {
-        setIsDisplayVertical(false);
-      }
-    };
-
-    window.addEventListener("resize", handleDisplayStyle);
-
-    handleDisplayStyle();
-
-    return () => {
-      window.removeEventListener("resize", handleDisplayStyle);
-    };
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -138,7 +124,7 @@ export const AppNavigationBar = ({ className }: Props) => {
         {!isDisplayVertical && (
           <div
             className="group relative size-full flex items-center justify-center cursor-pointer md:size-[60px] order-1"
-            onClick={() => {}}
+            onClick={() => setIsCreatingNewPost(true)}
           >
             <div className="relative z-10">
               <SquarePen

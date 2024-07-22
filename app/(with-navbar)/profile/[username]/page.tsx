@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Post } from "@prisma/client";
 import { Copy, ImagePlus, Images, Layers } from "lucide-react";
 import { getListPostsByUserId } from "@/action/post/get";
-import { getUserByUserName } from "@/action/user/get";
+import { getUserInfoByUserName } from "@/action/user-info/get";
 import Image from "next/image";
 
 interface Props {
@@ -20,7 +20,7 @@ export default function ProfilePage({ params }: Props) {
 
   useEffect(() => {
     const fetch = async () => {
-      const userInfo = await getUserByUserName(params.username);
+      const userInfo = await getUserInfoByUserName(params.username);
       if (userInfo) {
         const list = await getListPostsByUserId(userInfo.id);
         setListPosts(list);
@@ -37,7 +37,7 @@ export default function ProfilePage({ params }: Props) {
   return (
     <div className="py-2">
       {listPosts === undefined ? (
-        "Loading"
+        <div className="w-full">Loading</div>
       ) : listPosts === null ? (
         <div className="h-96 flex flex-col items-center justify-center gap-y-6">
           <div className="p-6 rounded-full border border-unselected">

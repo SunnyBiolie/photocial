@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { UserInfo } from "@prisma/client";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
@@ -11,6 +11,11 @@ interface Props {
 
 export const ProfileAvatar = ({ profileOwner }: Props) => {
   const [isViewAvatar, setIsViewAvatar] = useState(false);
+
+  useEffect(() => {
+    if (isViewAvatar) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+  }, [isViewAvatar]);
 
   return (
     <div className="relative size-32 bg-neutral-500 rounded-full overflow-hidden cursor-pointer">
@@ -26,7 +31,7 @@ export const ProfileAvatar = ({ profileOwner }: Props) => {
       />
       {isViewAvatar && (
         <div
-          className="fixed top-0 left-0 size-full bg-neutral-900/75 backdrop-blur-2xl animate-[display-backdrop-blur_.2s_linear] z-50"
+          className="fixed top-0 left-0 size-full bg-neutral-900/75 backdrop-blur-2xl animate-fade-in z-50"
           onClick={() => {
             setIsViewAvatar(false);
           }}

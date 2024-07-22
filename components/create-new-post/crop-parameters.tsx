@@ -1,21 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { ElementRef, MouseEvent, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { ImageQueue } from "./image-queue";
+import { configCropParams } from "@/photocial.config";
 import { AspectRatio } from "@/types/create-post-types";
+import { useCreateNewPost } from "@/hooks/use-create-new-post";
 import { defaultPercSizeAndPos } from "./utils";
-import { configValues } from "./container";
-import { CiCrop } from "react-icons/ci";
-import { LuRectangleHorizontal, LuRectangleVertical } from "react-icons/lu";
-
-const vertical: AspectRatio[] = [0.5625, 0.6666666666666667, 0.75, 0.8, 1];
-const verticalDisplay = ["9:16", "2:3", "3:4", "4:5", "1:1"];
-const horizontal: AspectRatio[] = [
-  1.7777777777777778, 1.5, 1.3333333333333333, 1.25, 1,
-];
-const horizontalDisplay = ["16:9", "3:2", "4:3", "5:4", "1:1"];
+import { Check, Crop, Images, Ratio, RectangleVertical, X } from "lucide-react";
+import { ImageQueue } from "./image-queue";
 
 export const CropParameters = () => {
   const {
@@ -28,11 +20,31 @@ export const CropParameters = () => {
     setAspectRatio,
   } = useCreateNewPost();
 
+  const ratioSelectorRef = useRef<ElementRef<"div">>(null);
+  const imageSelectorRef = useRef<ElementRef<"div">>(null);
+
   const [arIndex, setARIndex] = useState<number>(
-    vertical.indexOf(aspectRatio) !== -1
-      ? vertical.indexOf(aspectRatio)
-      : horizontal.indexOf(aspectRatio)
+    configCropParams.vertical.indexOf(aspectRatio) !== -1
+      ? configCropParams.vertical.indexOf(aspectRatio)
+      : configCropParams.horizontal.indexOf(aspectRatio)
   );
+  const [isOpenRatioSelector, setIsOpenRatioSelector] =
+    useState<boolean>(false);
+  const [isOpenImageSelector, setIsOpenImageSelector] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    // Ẩn các selector khi nhấn vào window, có thể chặn bằng stopPropagation
+    const hideSelector = () => {
+      hideRatioSelector();
+      hideImageSelector();
+    };
+    window.addEventListener("click", hideSelector);
+
+    return () => {
+      window.removeEventListener("click", hideSelector);
+    };
+  }, []);
 
   if (!arrImgPreCropData) return;
 
@@ -76,78 +88,163 @@ export const CropParameters = () => {
     });
   };
 
+  const hideRatioSelector = () => {
+    const ratioSelectorTarget = ratioSelectorRef.current;
+    if (ratioSelectorTarget) {
+      ratioSelectorTarget.style.opacity = "0";
+      ratioSelectorTarget.style.bottom = "100%";
+
+      const delay = async () => {
+        await new Promise((r) => setTimeout(r, 150));
+        setIsOpenRatioSelector(false);
+      };
+      delay();
+    }
+  };
+
+  const hideImageSelector = () => {
+    const imageSelectorTarget = imageSelectorRef.current;
+    if (imageSelectorTarget) {
+      imageSelectorTarget.style.opacity = "0";
+      imageSelectorTarget.style.bottom = "100%";
+
+      const delay = async () => {
+        await new Promise((r) => setTimeout(r, 150));
+        setIsOpenImageSelector(false);
+      };
+      delay();
+    }
+  };
+
+  const openRatioSelector = (
+    e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+  ) => {
+    if (!isOpenRatioSelector) e.stopPropagation();
+    setIsOpenRatioSelector(true);
+
+    hideImageSelector();
+  };
+
+  const openImageSelector = (
+    e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+  ) => {
+    if (!isOpenImageSelector) e.stopPropagation();
+    setIsOpenImageSelector(true);
+
+    hideRatioSelector();
+  };
+
   return (
-    <div className="flex-1 w-[325px] bg-dark_2 p-4 text-sm font-medium space-y-3 overflow-hidden select-none">
-      <section className="space-y-1.5">
-        <p>Direction</p>
-        <div className="w-fit bg-dark_3 p-1 rounded-md flex items-center gap-x-1">
+    <div className="absolute bottom-0 left-0 w-full p-4 text-sm font-medium">
+      <div className="relative flex items-center justify-between">
+        <div className="flex items-center gap-x-2">
           <div
-            className={cn(
-              "py-2 px-3 rounded-md cursor-pointer",
-              direction === "vertical" && "bg-light_3"
-            )}
-            onClick={() => handleSelectDirection("vertical", vertical[arIndex])}
+            className="relative rounded-full p-2.5 cursor-pointer dark:bg-neutral-900/80"
+            onClick={openRatioSelector}
           >
-            <LuRectangleVertical className="size-5" />
+            {isOpenRatioSelector ? (
+              <X
+                strokeWidth={2}
+                className="size-4 animate-[appear-lg_0.15s_linear]"
+              />
+            ) : (
+              <Ratio
+                strokeWidth={1.5}
+                className="size-4 animate-[appear-lg_0.15s_linear]"
+              />
+            )}
           </div>
           <div
-            className={cn(
-              "py-2 px-3 rounded-md cursor-pointer",
-              direction === "horizontal" && "bg-light_3"
-            )}
-            onClick={() =>
-              handleSelectDirection("horizontal", horizontal[arIndex])
-            }
+            className="relative rounded-full p-2.5 cursor-pointer dark:bg-neutral-900/80"
+            onClick={() => setState("cr")}
           >
-            <LuRectangleHorizontal className="size-5" />
+            <Crop
+              strokeWidth={2}
+              className="size-4 animate-[appear-lg_0.15s_linear]"
+            />
           </div>
         </div>
-      </section>
-      <section className="space-y-1.5">
-        <p>Aspect ratio</p>
-        <div className="w-fit bg-dark_3 p-1 rounded-md flex items-center gap-x-1">
-          {direction === "vertical"
-            ? vertical.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "py-2 px-3 rounded-md cursor-pointer",
-                    item === aspectRatio && "bg-light_3"
-                  )}
-                  onClick={() => handleSelectAR(item, index)}
-                >
-                  {verticalDisplay[index]}
-                </div>
-              ))
-            : horizontal.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "py-2 px-3 rounded-md cursor-pointer",
-                    item === aspectRatio && "bg-light_3"
-                  )}
-                  onClick={() => handleSelectAR(item, index)}
-                >
-                  {horizontalDisplay[index]}
-                </div>
-              ))}
-        </div>
-      </section>
-      <section className="space-y-1.5">
-        <p>
-          Photos ({arrImgPreCropData.length}/{configValues.maxImageFiles})
-        </p>
-        <ImageQueue />
-      </section>
-      <section className="space-y-1.5">
-        <p>Crop in more detail</p>
-        <button
-          className="p-2 rounded-sm bg-dark_3 hover:bg-light_3 transition"
-          onClick={() => setState("cr")}
+        <div
+          className="relative rounded-full p-2.5 cursor-pointer dark:bg-neutral-900/80"
+          onClick={openImageSelector}
         >
-          <CiCrop className="size-6" />
-        </button>
-      </section>
+          {isOpenImageSelector ? (
+            <X
+              strokeWidth={2}
+              className="size-4 animate-[appear-lg_0.15s_linear]"
+            />
+          ) : (
+            <Images
+              strokeWidth={1.5}
+              className="size-4 animate-[appear-lg_0.15s_linear]"
+            />
+          )}
+        </div>
+        {isOpenRatioSelector && (
+          <div
+            ref={ratioSelectorRef}
+            className="absolute bottom-[150%] left-0 w-36 rounded-md overflow-hidden animate-[slide-in-up_0.15s_linear] transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="px-4 py-2 border-b flex items-center justify-between cursor-pointer dark:bg-neutral-900/80 dark:border-neutral-500"
+              onClick={() => {
+                const d = direction === "vertical" ? "horizontal" : "vertical";
+                handleSelectDirection(
+                  d,
+                  configCropParams[d].toReversed()[arIndex]
+                );
+              }}
+            >
+              <span className="capitalize">{direction}</span>
+              <RectangleVertical
+                className={cn(
+                  "size-5 transition-all",
+                  direction === "horizontal" && "rotate-90"
+                )}
+              />
+            </div>
+            {direction === "vertical"
+              ? configCropParams.vertical.toReversed().map((item, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "px-4 py-2 border-b flex items-center justify-between cursor-pointer dark:text-neutral-400 dark:bg-neutral-900/80 dark:hover:bg-neutral-700/80 dark:border-neutral-900/80",
+                      item === aspectRatio && "dark:text-normal"
+                    )}
+                    onClick={() => handleSelectAR(item, index)}
+                  >
+                    {configCropParams.verticalDisplay.toReversed()[index]}
+                    {item === aspectRatio && <Check className="size-4" />}
+                  </div>
+                ))
+              : configCropParams.horizontal.toReversed().map((item, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "px-4 py-2 border-b flex items-center justify-between cursor-pointer dark:text-neutral-400 dark:bg-neutral-900/80 dark:hover:bg-neutral-700/80 dark:border-neutral-900/80",
+                      item === aspectRatio && "dark:text-normal"
+                    )}
+                    onClick={() => handleSelectAR(item, index)}
+                  >
+                    {configCropParams.horizontalDisplay.toReversed()[index]}
+                    {item === aspectRatio && <Check className="size-4" />}
+                  </div>
+                ))}
+          </div>
+        )}
+        {isOpenImageSelector && (
+          <div
+            ref={imageSelectorRef}
+            className="absolute bottom-[150%] right-0 max-w-full rounded-md overflow-hidden animate-[slide-in-up_0.15s_linear] transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="dark:bg-neutral-900/80">
+              <ImageQueue />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

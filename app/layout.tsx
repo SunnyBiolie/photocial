@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { UserInfoProvider } from "@/components/providers/user-info-provider";
+import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const openSans = Open_Sans({ subsets: ["latin", "vietnamese"] });
 
 export const metadata: Metadata = {
   title: "Photocial",
@@ -19,15 +21,18 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+        <body className={openSans.className}>
+          <UserInfoProvider>
+            <Toaster richColors position="top-right" />
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </UserInfoProvider>
         </body>
       </html>
     </ClerkProvider>

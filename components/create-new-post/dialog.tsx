@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Loading } from "../loading";
+import { Loading } from "../others/loading";
 import { IoIosDoneAll } from "react-icons/io";
 import { MdErrorOutline } from "react-icons/md";
 
@@ -54,7 +54,7 @@ export const Dialog = ({
   return (
     <div className="size-full fixed top-0 left-0 flex items-center justify-center z-50">
       <div className="size-full absolute top-0 left-0 bg-neutral-950/60"></div>
-      <div className="w-[400px] absolute rounded-xl bg-neutral-900 overflow-hidden animate-[appear_0.05s_linear]">
+      <div className="w-[calc(100%-16px)] max-w-[400px] absolute rounded-xl bg-coffee-bean overflow-hidden shadow-md animate-[appear_0.05s_linear]">
         <div className="flex flex-col items-center justify-center gap-y-2 m-8">
           <h6 className="text-xl font-medium tracking-wide">{title}</h6>
           <p className="text-sm text-center">{message}</p>

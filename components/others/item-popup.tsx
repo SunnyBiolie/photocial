@@ -17,15 +17,18 @@ export const ItemPopup = ({ Icon }: Props) => {
       onClick={() => setIsOpen(true)}
     >
       <Icon />
-      {/* {isOpen && (
+      {isOpen && (
         <>
           <div className="absolute bottom-0 left-0 bg-coffee-bean">Popup</div>
           <div
-            className="fixed top-0 left-0 size-full bg-rose-700"
-            onClick={() => setIsOpen(false)}
+            className="fixed top-0 left-0 right-0 bottom-0 bg-neutral-700"
+            onClick={(e) => {
+              setIsOpen(false);
+              e.stopPropagation();
+            }}
           ></div>
         </>
-      )} */}
+      )}
     </div>
   );
 };

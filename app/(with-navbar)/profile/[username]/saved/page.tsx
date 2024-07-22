@@ -1,3 +1,3 @@
 export default function SavedPage() {
-  return <div>SAVED POSTS</div>;
+  return <div className="w-full">SAVED POSTS</div>;
 }
