@@ -12,6 +12,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "images.clerk.dev",
+      },
+      {
+        protocol: "https",
         hostname: "ik.imagekit.io",
       },
     ],
@@ -21,6 +25,15 @@ const nextConfig = {
       {
         source: "/@:username/:path*",
         destination: "/profile/:username/:path*",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/profile/:username/:path*",
+        destination: "/@:username/:path*",
+        permanent: true,
       },
     ];
   },

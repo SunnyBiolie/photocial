@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { UserInfo } from "@prisma/client";
+import { Account } from "@prisma/client";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
 
 interface Props {
-  profileOwner: UserInfo;
+  profileOwner: Account;
 }
 
 export const ProfileAvatar = ({ profileOwner }: Props) => {
@@ -23,7 +23,7 @@ export const ProfileAvatar = ({ profileOwner }: Props) => {
         src={profileOwner.imageUrl}
         alt={`${profileOwner.userName}'s avatar`}
         fill
-        sizes="auto"
+        sizes="256px"
         className="object-cover"
         onClick={() => {
           setIsViewAvatar(true);
@@ -41,7 +41,7 @@ export const ProfileAvatar = ({ profileOwner }: Props) => {
               src={profileOwner.imageUrl}
               alt={`${profileOwner.userName}'s avatar`}
               fill
-              sizes="auto"
+              sizes="100w"
               className="object-cover"
               onClick={(e) => e.stopPropagation()}
             />

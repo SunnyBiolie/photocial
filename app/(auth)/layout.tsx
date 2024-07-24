@@ -7,7 +7,7 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div className="size-full flex items-center justify-center">
+    <div className="w-screen h-screen flex items-center justify-center">
       <AuthSlider slides={AuthBackgrounds} />
       <div className="fixed">{children}</div>
     </div>

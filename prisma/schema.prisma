@@ -8,16 +8,16 @@ datasource db {
 }
 
 model Comment {
+  id         String   @id @default(cuid())
   userId     String
   postId     String
-  content    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime
-  id         String   @id
   parentId   String
   replyForId String?
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   Post       Post     @relation(fields: [postId], references: [id])
-  UserInfo   UserInfo @relation(fields: [userId], references: [id])
+  Account   Account   @relation(fields: [userId], references: [id])
 }
 
 model Image {
@@ -28,28 +28,41 @@ model Image {
 }
 
 model Post {
-  id                               String     @id @default(cuid())
-  authorId                         String
-  hideLikeCounts                   Boolean
-  turnOffCmt                       Boolean
+  id                               String    @id @default(cuid())
   caption                          String?
+  isHideLikeCounts                 Boolean
+  isOffComment                     Boolean
+  listImageURLs                    String[]
   aspectRatio                      Float
-  createdAt                        DateTime   @default(now())
-  imagesUrl                        String[]
-  updatedAt                        DateTime   @updatedAt
-  Comment                          Comment[]
-  Image                            Image[]
-  UserInfo_Post_authorIdToUserInfo UserInfo   @relation("Post_authorIdToUserInfo", fields: [authorId], references: [id])
-  UserInfo_PostToUserInfo          UserInfo[] @relation("PostToUserInfo")
+  authorId                         String
+  createdAt                        DateTime  @default(now())
+  updatedAt                        DateTime  @updatedAt
+  Account Account   @relation("Post_authorIdToUserInfo", fields: [authorId], references: [id])
+  listComments                          Comment[]
+  listImages                            Image[]
+  listLikedBy            Account[] @relation("UserLikedPost")
+  listSavedBy            Account[] @relation("UserSavedPost")
 }
 
-model UserInfo {
-  id                           String    @id
+model Account {
+  id                           String     @id
   imageUrl                     String
   userName                     String
-  followes                     String[]
-  followings                   String[]
-  Comment                      Comment[]
-  Post_Post_authorIdToUserInfo Post[]    @relation("Post_authorIdToUserInfo")
-  Post_PostToUserInfo          Post[]    @relation("PostToUserInfo")
+  biography                    String?
+  isPrivate                    Boolean    @default(false)
+  followedBy                   Follows[]  @relation("followedBy")
+  following                    Follows[]  @relation("following")
+  listComments                 Comment[]
+  listPosts                    Post[]     @relation("Post_authorIdToUserInfo")
+  listLikedPost                Post[]     @relation("UserLikedPost")
+  listSavedPost                Post[]     @relation("UserSavedPost")
+}
+
+model Follows {
+  followedBy      Account   @relation("followedBy", fields: [followedById], references: [id])
+  followedById    String
+  following       Account   @relation("following", fields: [followingId], references: [id])
+  followingId     String
+
+  @@id([followingId, followedById])
 }

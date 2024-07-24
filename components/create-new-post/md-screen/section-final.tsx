@@ -5,7 +5,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { createNewPost } from "@/action/post/create";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { useUserInfo } from "@/hooks/use-user-info";
+import { useAccount } from "@/hooks/use-account";
 import { StateHeader } from "../state-header";
 import { FinalPreviews } from "../final-previews";
 import { FinalMoreSettings } from "../final-more-settings";
@@ -18,7 +18,7 @@ export type PostSettings = {
 };
 
 export const CNP_FinalState_MD = () => {
-  const { userInfo } = useUserInfo();
+  const { account } = useAccount();
 
   const {
     setState,
@@ -34,6 +34,8 @@ export const CNP_FinalState_MD = () => {
     hideLikeCounts: false,
     turnOffCmt: false,
   });
+
+  if (!account) return;
 
   const handleBack = () => {
     setDialog({
@@ -109,14 +111,14 @@ export const CNP_FinalState_MD = () => {
           <div className="flex items-center gap-x-3 my-4 mx-4">
             <div className="relative size-7 rounded-full overflow-hidden">
               <Image
-                src={userInfo?.imageUrl || ""}
+                src={account.imageUrl || ""}
                 alt=""
                 fill
                 sizes="auto"
                 className="object-cover"
               />
             </div>
-            <span className="text-sm font-semibold">{userInfo?.userName}</span>
+            <span className="text-sm font-semibold">{account.userName}</span>
           </div>
           <PostCaption
             caption={caption}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import { Post } from "@prisma/client";
-import { Copy, ImagePlus, Images, Layers } from "lucide-react";
-import { getListPostsByUserId } from "@/action/post/get";
-import { getUserInfoByUserName } from "@/action/user-info/get";
-import Image from "next/image";
+import { getListPostsByAccountId } from "@/action/post/get";
+import { getAccountByUserName } from "@/action/account/get";
+import { useAccount } from "@/hooks/use-account";
+import { ProfilePostItem } from "@/components/profile/profile-post-item";
+import { ImagePlus, Loader } from "lucide-react";
 
 interface Props {
   params: {
@@ -14,62 +15,54 @@ interface Props {
 }
 
 export default function ProfilePage({ params }: Props) {
-  const [listPosts, setListPosts] = useState<Post[] | null | undefined>(
-    undefined
-  );
+  const { account } = useAccount();
+
+  const [listPosts, setListPosts] = useState<Post[] | null>();
 
   useEffect(() => {
     const fetch = async () => {
-      const userInfo = await getUserInfoByUserName(params.username);
-      if (userInfo) {
-        const list = await getListPostsByUserId(userInfo.id);
+      const account = await getAccountByUserName(params.username);
+      if (account) {
+        const list = await getListPostsByAccountId(account.id);
         setListPosts(list);
       }
     };
     fetch();
   }, [params]);
 
-  const imageKitLoader = ({ src, width }: { src: string; width: number }) => {
-    // aspect ratio: 1 / 1
-    return `${src}?tr=ar-1-1,w-${width}`;
-  };
+  if (!account) return;
+
+  if (listPosts === undefined)
+    return (
+      <div className="w-full py-4 flex items-center justify-center">
+        <Loader className="size-6 animate-slow-spin" />
+      </div>
+    );
 
   return (
     <div className="py-2">
-      {listPosts === undefined ? (
-        <div className="w-full">Loading</div>
-      ) : listPosts === null ? (
+      {listPosts === null ? (
         <div className="h-96 flex flex-col items-center justify-center gap-y-6">
           <div className="p-6 rounded-full border border-unselected">
             <ImagePlus strokeWidth={1} className="size-10 text-unselected" />
           </div>
           <div className="space-y-4">
             <p className="text-3xl font-bold text-center">
-              Nothing to show...yet!
+              {account.userName === params.username
+                ? `Nothing to show...yet!`
+                : `No Posts Yet.`}
             </p>
             <p className="text-sm font-light text-center">
-              When you share photos, they will will live here.
+              {account.userName === params.username
+                ? `When you share photos, they will live here.`
+                : ``}
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-          {listPosts.toReversed().map((p, i) => (
-            <div key={i} className="relative">
-              <Image
-                loader={imageKitLoader}
-                src={`${p.imagesUrl[0]}`}
-                alt=""
-                width={1080}
-                height={1080}
-                className="object-cover"
-              />
-              <div className="absolute top-3 right-3">
-                <Images className="size-5">
-                  <title>{p.imagesUrl.length} photos</title>
-                </Images>
-              </div>
-            </div>
+          {listPosts.toReversed().map((p) => (
+            <ProfilePostItem key={p.id} post={p} />
           ))}
         </div>
       )}

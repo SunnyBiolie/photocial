@@ -3,7 +3,7 @@ import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { UserInfoProvider } from "@/components/providers/user-info-provider";
+import { AccountProvider } from "@/components/providers/account-provider";
 import { Toaster } from "sonner";
 
 const openSans = Open_Sans({ subsets: ["latin", "vietnamese"] });
@@ -22,7 +22,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={openSans.className}>
-          <UserInfoProvider>
+          <AccountProvider>
             <Toaster richColors position="top-right" />
             <ThemeProvider
               attribute="class"
@@ -32,7 +32,7 @@ export default function RootLayout({
             >
               {children}
             </ThemeProvider>
-          </UserInfoProvider>
+          </AccountProvider>
         </body>
       </html>
     </ClerkProvider>

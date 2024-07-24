@@ -3,11 +3,11 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-
-import { type IconType } from "react-icons";
+import { useAccount } from "@/hooks/use-account";
+import { useBreakpoint } from "@/hooks/use-breakppoint";
 import { ItemNavigation } from "./item-navigation";
+import { type IconType } from "react-icons";
 import {
   AlignLeft,
   Bell,
@@ -21,7 +21,6 @@ import { BiHomeAlt2 } from "react-icons/bi";
 import { ItemPopup } from "./item-popup";
 
 interface Props {
-  isDisplayVertical: boolean | undefined;
   setIsCreatingNewPost: Dispatch<SetStateAction<boolean>>;
   className?: string;
 }
@@ -34,16 +33,18 @@ export interface NavItem {
 }
 
 export const AppNavigationBar = ({
-  isDisplayVertical,
   setIsCreatingNewPost,
   className,
 }: Props) => {
-  const { user } = useUser();
+  const { isMedium } = useBreakpoint();
+  const { account } = useAccount();
 
   const pathname = usePathname();
 
+  let mainItem: NavItem[] = [];
+
   useEffect(() => {
-    if (!user) return;
+    if (!account) return;
 
     let check = false;
     mainItem.forEach((item) => {
@@ -53,13 +54,13 @@ export const AppNavigationBar = ({
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [account, pathname]);
 
-  if (isDisplayVertical === undefined) return;
+  if (isMedium === undefined) return;
 
-  if (!user) return;
+  if (!account) return;
 
-  const mainItem: NavItem[] = [
+  mainItem = [
     {
       title: "Home",
       href: "/",
@@ -80,8 +81,8 @@ export const AppNavigationBar = ({
     },
     {
       title: "Profile",
-      href: `/@${user.username}`,
-      isActive: pathname.split("/")[1] === `@${user.username}`,
+      href: `/@${account.userName}`,
+      isActive: pathname.split("/")[1] === `@${account.userName}`,
       Icon: UserRound,
     },
   ];
@@ -94,7 +95,7 @@ export const AppNavigationBar = ({
       )}
     >
       <div className="py-4">
-        {isDisplayVertical && (
+        {isMedium && (
           <Link href="/" className="">
             <div className="relative size-10 rounded-full overflow-hidden bg-sky-500">
               {/* <Image
@@ -121,7 +122,7 @@ export const AppNavigationBar = ({
             }}
           />
         ))}
-        {!isDisplayVertical && (
+        {!isMedium && (
           <div
             className="group relative size-full flex items-center justify-center cursor-pointer md:size-[60px] order-1"
             onClick={() => setIsCreatingNewPost(true)}
@@ -135,7 +136,7 @@ export const AppNavigationBar = ({
           </div>
         )}
       </nav>
-      {isDisplayVertical && (
+      {isMedium && (
         <div className="mb-5">
           <ItemPopup Icon={Pin} />
           <ItemPopup Icon={AlignLeft} />

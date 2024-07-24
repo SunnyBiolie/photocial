@@ -77,11 +77,28 @@ const config: Config = {
             bottom: "100%",
           },
         },
+        create: {
+          from: {
+            "background-color": "rgba(42, 42, 42, 1)",
+          },
+          to: {
+            "background-color": "rgba(42, 42, 42, 0)",
+          },
+        },
+        "click-bounce": {
+          "0%": { transform: "scale(1)" },
+          "20%": { transform: "scale(1.2)" },
+          "35%": { transform: "scale(1.25)" },
+          "50%": { transform: "scale(1.2)" },
+          "90%": { transform: "scale(0.9)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "nav-item_click": "nav-item_click 0.2s linear",
         "fade-in": "fade-in 0.2s linear",
         "fade-out": "fade-out 0.2s linear",
+        "slow-spin": "spin 1.5s linear infinite",
       },
     },
   },

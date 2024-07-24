@@ -16,12 +16,13 @@ import {
   ImageFile,
 } from "@/types/create-post-types";
 import { defaultPercSizeAndPos } from "./utils";
+import { useBreakpoint } from "@/hooks/use-breakppoint";
+import { configCreateNewPost } from "@/photocial.config";
 import { CNP_SectionInput_MD } from "./section-input";
 import { CNP_AdvancedCrop_MD } from "./md-screen/section-advanced-crop";
 import { CNP_SectionCrop_MD } from "./md-screen/section-crop";
 import { CNP_FinalState_MD } from "./md-screen/section-final";
 import { Dialog, DialogProps } from "./dialog";
-import { configCreateNewPost } from "@/photocial.config";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
 import { CNP_SectionCrop } from "./section-crop";
 
@@ -49,14 +50,11 @@ export const CreateNewPostContext = createContext<
 interface Props {
   isShow: boolean;
   setIsShow: Dispatch<SetStateAction<boolean>>;
-  isDisplayVertical: boolean;
 }
 
-export const CreateNewPost = ({
-  isShow,
-  setIsShow,
-  isDisplayVertical,
-}: Props) => {
+export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
+  const { isMedium } = useBreakpoint();
+
   const [state, setState] = useState<CreatePostState>("se");
   const [imageFiles, setImageFiles] = useState<ImageFile[]>();
   const [arrImgPreCropData, setArrImgPreCropData] =
@@ -199,7 +197,7 @@ export const CreateNewPost = ({
                 <div className="flex-1 md:p-8">
                   <div className="relative size-full rounded-xl md:max-w-[800px] md:rounded-md overflow-hidden">
                     {state === "ar" ? (
-                      isDisplayVertical ? (
+                      isMedium ? (
                         <CNP_SectionCrop_MD />
                       ) : (
                         <CNP_SectionCrop />
