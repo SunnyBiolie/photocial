@@ -106,7 +106,9 @@ export const CNP_FinalState_MD = () => {
         handleRightBtn={handleSharePost}
       />
       <div className="w-[min(100vw-16px,475px)] aspect-square overflow-auto flex flex-col md:w-auto md:aspect-auto md:flex-row">
-        <FinalPreviews />
+        <div className="py-2 backdrop-blur-sm dark:bg-neutral-950/75 md:py-0 md:backdrop-blur-none md:dark:bg-transparent">
+          <FinalPreviews />
+        </div>
         <div className="flex-1 order-first w-full bg-[rgb(32,32,32)] md:order-none md:w-[325px]">
           <div className="flex items-center gap-x-3 my-4 mx-4">
             <div className="relative size-7 rounded-full overflow-hidden">

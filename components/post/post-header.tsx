@@ -5,6 +5,7 @@ import { Post, Account } from "@prisma/client";
 import { cn, transformTime } from "@/lib/utils";
 import { GoDotFill } from "react-icons/go";
 import { IoIosMore } from "react-icons/io";
+import { AccountAvatar } from "../others/account-avatar";
 
 interface Props {
   post: Post;
@@ -18,15 +19,7 @@ export const PostHeader = ({ post, author, isInCard, className }: Props) => {
 
   return (
     <div className={cn("w-full flex items-center", className)}>
-      <div className="relative size-8 mr-3 aspect-square rounded-full bg-neutral-300 dark:bg-neutral-500 overflow-hidden">
-        <Image
-          src={author.imageUrl}
-          alt=""
-          className="size-full object-cover"
-          fill
-          sizes="auto"
-        />
-      </div>
+      <AccountAvatar account={author} sizes="64px" className="size-8 mr-3" />
       <div className="flex-1 flex items-center justify-between">
         <div className="h-full flex flex-col justify-between">
           <div className="flex items-center gap-x-1">

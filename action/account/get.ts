@@ -78,3 +78,32 @@ export const getListAccountsByListAccountIds = async (accountIds: string[]) => {
     return undefined;
   }
 };
+
+export const getListAccountsByPrivateStatus = async (isPrivate: boolean) => {
+  try {
+    const list = await prisma.account.findMany({
+      where: {
+        isPrivate,
+      },
+    });
+
+    return list.length === 0 ? null : list;
+  } catch (err) {
+    return undefined;
+  }
+};
+
+export const getListAccountsBySearchUserName = async (text: string) => {
+  try {
+    const result = await prisma.account.findMany({
+      where: {
+        userName: {
+          contains: text,
+        },
+      },
+    });
+    return result.length === 0 ? null : result;
+  } catch (err) {
+    return undefined;
+  }
+};

@@ -11,6 +11,8 @@ import {
 import { getListAccountsByListAccountIds } from "@/action/account/get";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
 import { Loader } from "lucide-react";
+import { AccountAvatar } from "../others/account-avatar";
+import { ErrorMessage } from "../others/error-message";
 
 interface Props {
   profileOwner: Account;
@@ -77,13 +79,16 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
   }, [listAccountIds]);
 
   const handleClick = () => {
-    if (counts === 0) return;
+    if (counts === 0) {
+      setListAccountIds(null);
+      setListFollowsAccounts(null);
+    }
     setIsOpen(true);
   };
 
   return (
     <>
-      <button onClick={handleClick} disabled={counts === 0}>
+      <button onClick={handleClick}>
         <span className="font-semibold">{counts}</span>{" "}
         {type === "followers" ? <span>followers</span> : <span>following</span>}
       </button>
@@ -111,9 +116,7 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
                     : `${profileOwner.userName} doesn't follow anyone yet.`}
                 </p>
               ) : listFollowsAccounts.length === 0 ? (
-                <p className="text-center text-sm dark:text-rose-600 font-medium">
-                  Something went wrong, try again later.
-                </p>
+                <ErrorMessage />
               ) : (
                 listFollowsAccounts.map((account, id) => (
                   <FollowsItem key={id} account={account} />
@@ -134,15 +137,11 @@ interface ItemProps {
 const FollowsItem = ({ account }: ItemProps) => {
   return (
     <div className="flex items-center">
-      <div className="shrink-0 relative size-10 rounded-full overflow-hidden mr-3">
-        <Image
-          src={account.imageUrl}
-          alt={`${account.userName}'s avatar`}
-          fill
-          sizes="80px"
-          className="object-cover"
-        />
-      </div>
+      <AccountAvatar
+        account={account}
+        sizes="80px"
+        className="shrink-0 size-10 mr-3"
+      />
       <div className="flex-1">
         <Link href={`@${account.userName}`} className="font-bold">
           {account.userName}

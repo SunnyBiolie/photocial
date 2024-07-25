@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Account } from "@prisma/client";
-import { ProfileAvatar } from "./profile-avatar";
+import { AccountAvatar } from "../others/account-avatar";
 import { useAccount } from "@/hooks/use-account";
 import { FollowButton } from "./follow-button";
 import { EditProfileButton } from "./edit-button";
@@ -34,7 +34,7 @@ export const ProfileInfor = ({
 
   return (
     <div className="mx-2 py-10 flex flex-col items-center justify-center gap-y-4 md:w-[min(100%,450px)] md:mx-auto">
-      <ProfileAvatar profileOwner={profileOwner} />
+      <AccountAvatar account={profileOwner} className="size-32" />
       <div>
         <p className="text-xl font-semibold">{profileOwner.userName}</p>
       </div>

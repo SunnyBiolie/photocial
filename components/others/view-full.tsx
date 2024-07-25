@@ -9,30 +9,27 @@ import { IoCloseOutline } from "react-icons/io5";
 import { useBreakpoint } from "@/hooks/use-breakppoint";
 
 export const ViewFull = () => {
-  const vf = useViewFull();
-
-  const isOpen = vf.isOpen;
-  const listImages = vf.listImages;
-  const currIndex = vf.currentIndex;
-  const ratio = vf.aspectRatio;
+  const {
+    isOpen,
+    onClose,
+    listImages,
+    currentIndex,
+    setCurrentIndex,
+    aspectRatio,
+  } = useViewFull();
 
   const ref = useRef<ElementRef<"div">>(null);
 
   const [isFullWidth, setIsFullWidth] = useState<boolean>();
 
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
-  }, [isOpen]);
-
-  useEffect(() => {
     const target = ref.current;
-    if (target && ratio) {
+    if (target && aspectRatio) {
       const ar = target.offsetWidth / target.offsetHeight;
-      if (ar <= ratio) setIsFullWidth(true);
+      if (ar <= aspectRatio) setIsFullWidth(true);
       else setIsFullWidth(false);
     }
-  }, [ratio]);
+  }, [aspectRatio]);
 
   // Thiết đặt các phím tắt
   useEffect(() => {
@@ -54,40 +51,40 @@ export const ViewFull = () => {
       window.onkeydown = () => {};
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, currIndex]);
+  }, [isOpen, currentIndex]);
 
   const handleClose = () => {
-    vf.onClose();
+    onClose();
   };
 
   const handlePrevImage = () => {
-    if (listImages === undefined || currIndex === undefined) return;
+    if (listImages === undefined || currentIndex === undefined) return;
 
-    if (listImages[currIndex - 1]) {
-      vf.setCurrentIndex(currIndex - 1);
+    if (listImages[currentIndex - 1]) {
+      setCurrentIndex(currentIndex - 1);
     }
   };
 
   const handleNextImage = () => {
-    if (listImages === undefined || currIndex === undefined) return;
+    if (listImages === undefined || currentIndex === undefined) return;
 
-    if (listImages[currIndex + 1]) {
-      vf.setCurrentIndex(currIndex + 1);
+    if (listImages[currentIndex + 1]) {
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
   if (
     isOpen &&
     listImages !== undefined &&
-    currIndex !== undefined &&
-    ratio !== undefined
+    currentIndex !== undefined &&
+    aspectRatio !== undefined
   ) {
     return (
       <div className="fixed z-50 top-0 right-0 bottom-0 left-0 bg-rich-black select-none flex animate-[appear_0.1s_linear]">
         <div className="shrink-0 w-24 flex items-center justify-center">
           <VF_ChangeImgBtn
             action="prev"
-            disabled={currIndex <= 0}
+            disabled={currentIndex <= 0}
             handleClick={handlePrevImage}
           />
         </div>
@@ -100,19 +97,19 @@ export const ViewFull = () => {
               "relative overflow-hidden",
               isFullWidth ? "w-full" : "h-full"
             )}
-            style={{ aspectRatio: ratio }}
+            style={{ aspectRatio }}
           >
             <div
               className="absolute h-full w-fit flex transition-all duration-500"
               style={{
-                left: `-${currIndex * 100}%`,
+                left: `-${currentIndex * 100}%`,
               }}
             >
               {listImages.map((img, index) => (
                 <div
                   key={index}
                   className="relative h-full bg-[#2A2A2A]"
-                  style={{ aspectRatio: ratio }}
+                  style={{ aspectRatio }}
                 >
                   <Image
                     src={img}
@@ -130,7 +127,7 @@ export const ViewFull = () => {
         <div className="shrink-0 w-24 flex items-center justify-center">
           <VF_ChangeImgBtn
             action="next"
-            disabled={currIndex >= listImages.length - 1}
+            disabled={currentIndex >= listImages.length - 1}
             handleClick={handleNextImage}
           />
         </div>

@@ -2,6 +2,7 @@
 
 import { CreateNewPost } from "@/components/create-new-post/create-new-post";
 import { AppNavigationBar } from "@/components/others/app-navbar";
+import { ViewAccountAvatar } from "@/components/others/view-account-avatar";
 import { ViewFull } from "@/components/others/view-full";
 import { useBreakpoint } from "@/hooks/use-breakppoint";
 import { Plus } from "lucide-react";
@@ -68,6 +69,7 @@ export default function WithNavbarLayout({ children, modal }: Props) {
       </div>
       {modal}
       <ViewFull />
+      <ViewAccountAvatar />
     </>
   );
 }

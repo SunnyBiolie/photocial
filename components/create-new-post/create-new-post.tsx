@@ -186,8 +186,8 @@ export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
         setDialog,
       }}
     >
-      <div className="fixed top-0 left-0 size-full animate-fade-in">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-auto flex flex-col z-10 ">
+      <div className="fixed top-0 left-0 size-full animate-fade-in z-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-auto flex flex-col z-10">
           {state === "se" && !imageFiles ? (
             <CNP_SectionInput_MD />
           ) : (

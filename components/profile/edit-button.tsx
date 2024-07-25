@@ -9,6 +9,8 @@ import { UpdateProfileData } from "@/types/others";
 import { updateAccount } from "@/action/account/update";
 import { ImageUp, Loader } from "lucide-react";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
+import { Loading } from "../others/loading";
+import { cn } from "@/lib/utils";
 
 interface Props {
   yourAccount: Account;
@@ -99,9 +101,11 @@ export const EditProfileButton = ({ yourAccount }: Props) => {
 
     const isSuccess = await updateAccount(user.id, imageURL, userName);
 
+    if (isSuccess) toast.success("Your changes have been saved");
+    else toast.error("Prisma error: failed to update profile");
+
     setIsLoading(false);
-    if (isSuccess) return toast.success("Your changes have been saved");
-    else return toast.error("Prisma error: failed to update profile");
+    setIsEditing(false);
   };
 
   return (
@@ -147,12 +151,15 @@ export const EditProfileButton = ({ yourAccount }: Props) => {
                 </div> */}
                 <div className="w-full mt-4">
                   <button
-                    className="w-full p-2.5 rounded-lg disabled:cursor-not-allowed dark:text-coffee-bean dark:bg-neutral-100 dark:hover:bg-neutral-200 dark:disabled:bg-neutral-400 transition-colors"
+                    className={cn(
+                      "w-full p-2.5 rounded-lg disabled:cursor-not-allowed dark:text-coffee-bean dark:bg-neutral-100 dark:hover:bg-neutral-200 transition-colors",
+                      !isLoading && "dark:disabled:bg-neutral-400"
+                    )}
                     onClick={updateProfile}
                     disabled={isLoading || !updateData}
                   >
                     {isLoading ? (
-                      <Loader className="animate-slow-spin mx-auto" />
+                      <Loading containerClassName="py-0.5" className="size-5" />
                     ) : (
                       <span className="font-medium text-center">
                         Save change

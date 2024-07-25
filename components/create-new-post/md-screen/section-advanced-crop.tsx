@@ -414,7 +414,7 @@ export const CNP_AdvancedCrop_MD = () => {
                         e.stopPropagation();
                       }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-full"></div>
+                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-sm"></div>
                     </div>
                     <div
                       className="absolute top-0 -right-[1px] bottom-0 cursor-ew-resize"
@@ -423,7 +423,7 @@ export const CNP_AdvancedCrop_MD = () => {
                         e.stopPropagation();
                       }}
                     >
-                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-md"></div>
+                      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 min-h-12 max-h-24 h-1/4 bg-sky-100 rounded-sm"></div>
                     </div>
                   </div>
                   <div

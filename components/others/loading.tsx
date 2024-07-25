@@ -1,16 +1,20 @@
-"use client";
-
 import { cn } from "@/lib/utils";
-import { TbLoader } from "react-icons/tb";
+import { Loader } from "lucide-react";
 
 interface LoadingProps {
+  containerClassName?: string;
   className?: string;
 }
 
-export const Loading = ({ className }: LoadingProps) => {
+export const Loading = ({ containerClassName, className }: LoadingProps) => {
   return (
-    <div className="size-full flex items-center justify-center">
-      <TbLoader className={cn("size-6 animate-spin", className)} />
+    <div
+      className={cn(
+        "size-full flex items-center justify-center",
+        containerClassName
+      )}
+    >
+      <Loader className={cn("animate-slow-spin", className)} />
     </div>
   );
 };

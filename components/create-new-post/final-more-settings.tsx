@@ -32,9 +32,9 @@ export const FinalMoreSettings = ({ postSettings, setPostSettings }: Props) => {
   }, []);
 
   return (
-    <div className="mx-4 text-sm mb-1">
+    <div className="text-sm">
       <div
-        className="flex items-center justify-between py-2 px-4 -mx-4 mb-1 cursor-pointer dark:bg-neutral-700"
+        className="flex items-center justify-between py-2 px-3 cursor-pointer dark:bg-neutral-700"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <span className="font-medium ">Other settings</span>
@@ -46,11 +46,13 @@ export const FinalMoreSettings = ({ postSettings, setPostSettings }: Props) => {
       <div
         ref={ref}
         className={cn(
-          "px-1 overflow-hidden transition-all duration-300",
+          "px-3 overflow-hidden transition-all duration-200 border-b border-neutral-700",
           isOpen ? "opacity-100" : "opacity-0"
         )}
         style={{
-          height: height ? (isOpen ? height + "px" : "0") : "auto",
+          height: height ? (isOpen ? height + 16 + "px" : "0") : "auto",
+          paddingTop: isOpen ? "8px" : "0",
+          paddingBottom: isOpen ? "8px" : "0",
         }}
       >
         <div className="flex items-center py-2 gap-x-2">

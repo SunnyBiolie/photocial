@@ -37,7 +37,7 @@ export const FinalPreviews = () => {
   }, []);
 
   return (
-    <div className="shrink-0 relative w-full aspect-square flex items-center justify-center bg-neutral-950/75 backdrop-blur-sm overflow-hidden md:size-[475px]">
+    <div className="shrink-0 relative w-full aspect-square flex items-center justify-center overflow-hidden md:size-[475px] md:backdrop-blur-sm md:dark:bg-neutral-950/75">
       {arrCroppedImgData && (
         <>
           <div

@@ -24,9 +24,9 @@ export const CropParameters = () => {
   const imageSelectorRef = useRef<ElementRef<"div">>(null);
 
   const [arIndex, setARIndex] = useState<number>(
-    configCropParams.vertical.indexOf(aspectRatio) !== -1
-      ? configCropParams.vertical.indexOf(aspectRatio)
-      : configCropParams.horizontal.indexOf(aspectRatio)
+    configCropParams.vertical.toReversed().indexOf(aspectRatio) !== -1
+      ? configCropParams.vertical.toReversed().indexOf(aspectRatio)
+      : configCropParams.horizontal.toReversed().indexOf(aspectRatio)
   );
   const [isOpenRatioSelector, setIsOpenRatioSelector] =
     useState<boolean>(false);
@@ -56,7 +56,6 @@ export const CropParameters = () => {
 
     handleSelectAR(ar, arIndex);
     setDirection(newDirection);
-    setAspectRatio(ar);
   };
 
   const handleSelectAR = (newAspectRatio: AspectRatio, index: number) => {

@@ -20,9 +20,11 @@ export const useViewFull = create<ViewFullState>()(
         isOpen: false,
         onOpen: () => {
           set({ isOpen: true });
+          document.body.style.overflowY = "hidden";
         },
         onClose: () => {
           set({ isOpen: false });
+          document.body.style.overflowY = "auto";
         },
         currentIndex: undefined,
         setCurrentIndex: (index) => {
