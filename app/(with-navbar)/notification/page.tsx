@@ -1,5 +1,7 @@
 "use client";
 
+import imageKit from "@/lib/imagekit";
+
 export default function NotificationPage() {
   return (
     <div className="w-[min(100%-24px,560px)] mx-auto -mb-[var(--app-navbar-horizontal-height)]">

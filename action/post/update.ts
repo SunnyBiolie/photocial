@@ -78,3 +78,18 @@ export const updateSavedPost = async (
     return true;
   }
 };
+
+export const updateImagesURL = async (postId: string, arrImgsURL: string[]) => {
+  try {
+    return await prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        listImageURLs: arrImgsURL,
+      },
+    });
+  } catch (error) {
+    throw error;
+  }
+};

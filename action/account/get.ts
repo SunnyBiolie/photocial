@@ -26,6 +26,7 @@ export const getAccountByAccountId = async (accountId: string) => {
 
     return account;
   } catch (err) {
+    console.error(err);
     return undefined;
   }
 };

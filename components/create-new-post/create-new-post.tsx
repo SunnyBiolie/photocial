@@ -27,6 +27,7 @@ import { ButtonCloseFullView } from "../others/btn-close-full-view";
 import { CNP_SectionCrop } from "./section-crop";
 import { useOpenCreatePost } from "@/hooks/use-open-create-post";
 import { DialogProps } from "@/types/others";
+import { Loading } from "../others/loading";
 
 type CreateNewPostContextType = {
   setState: Dispatch<SetStateAction<CreatePostState>>;
@@ -210,7 +211,7 @@ export const CreateNewPost = () => {
                 </div>
               </>
             ) : (
-              "Loading"
+              <Loading />
             ))
           )}
         </div>

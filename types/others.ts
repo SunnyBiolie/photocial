@@ -14,7 +14,7 @@ export type DialogProps = {
   type: "warning" | "double-check";
   acceptText: string;
   handleAccept?: () => void;
-  handleAcceptWithLoadingState?: () => Promise<string>;
+  handleAcceptWithLoadingState?: () => Promise<"success" | "error">;
   handleLoadingDone?: () => void;
   handleCancel: () => void;
 };

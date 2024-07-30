@@ -3,7 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { createNewPost } from "@/action/post/create";
+import { Post } from "@prisma/client";
+import imageKit from "@/lib/imagekit";
+import { configImageKit } from "@/photocial.config";
+import { createPost } from "@/action/post/create";
+import { createImage } from "@/action/image/create";
+import { updateImagesURL } from "@/action/post/update";
+import { deletePost } from "@/action/post/delete";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
 import { useCurrentAccount } from "@/hooks/use-current-account";
 import { useProfilePageData } from "@/hooks/use-profile-page-data";
@@ -65,7 +71,7 @@ export const CNP_FinalState_MD = () => {
   const handleSharePost = async () => {
     if (!arrCroppedImgData) return;
 
-    let type: string;
+    let type: "success" | "error";
 
     setDialog({
       titleType: "message",
@@ -74,19 +80,56 @@ export const CNP_FinalState_MD = () => {
       type: "double-check",
       acceptText: "Share it",
       handleAcceptWithLoadingState: async () => {
-        let listImagesData: Uint8Array[] = [];
-        arrCroppedImgData.forEach((item) => {
-          listImagesData.push(item.bytes);
-        });
-        const res = await createNewPost(
-          aspectRatio,
-          listImagesData,
-          caption,
-          postSettings.hideLikeCounts,
-          postSettings.turnOffCmt
+        const listImagesData: Uint8Array[] = arrCroppedImgData.map(
+          (item) => item.bytes
         );
-        toast[res.type](res.message);
-        type = res.type;
+        let checkPost: Post | undefined = undefined;
+        try {
+          const post = await createPost(
+            aspectRatio,
+            caption,
+            postSettings.hideLikeCounts,
+            postSettings.turnOffCmt
+          );
+          checkPost = post;
+
+          const uploadRespones = await Promise.all(
+            listImagesData.map(async (bytes) => {
+              const blob = new Blob([bytes]);
+
+              const respone = await imageKit.upload({
+                file: blob,
+                fileName: `${currentAccount.userName}`,
+                folder: configImageKit.folderName,
+              });
+              return respone;
+            })
+          );
+
+          const arrImgUrl = await Promise.all(
+            uploadRespones.map(async (respone) => {
+              const image = await createImage(
+                respone.fileId,
+                respone.url,
+                post.id
+              );
+              return image.url;
+            })
+          );
+
+          await updateImagesURL(post.id, arrImgUrl);
+
+          type = "success";
+          toast.success("Created post successfully");
+        } catch (error) {
+          type = "error";
+          toast.error("Something went wrong, try again later");
+          console.error(error);
+          if (checkPost) {
+            await deletePost(checkPost.id);
+          }
+        }
+
         return type;
       },
       handleLoadingDone: () => {
@@ -96,6 +139,8 @@ export const CNP_FinalState_MD = () => {
           setImageFiles(undefined);
           setListPostsOfCurrentAccount(undefined);
           setCurrentAccountNumberOf(undefined);
+
+          setListPostsOfCurrentAccount(undefined);
         } else if (type === "error") {
         }
       },

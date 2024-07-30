@@ -69,7 +69,7 @@ export default function SearchPage() {
           {isSearching ||
           (listAccounts !== undefined &&
             listIsFollowedByCurrentAccount === undefined) ? (
-            <Loading />
+            <Loading containerClassName="py-6" />
           ) : (
             listAccounts !== undefined &&
             listIsFollowedByCurrentAccount !== undefined &&
