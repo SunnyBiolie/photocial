@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Account } from "@prisma/client";
 import {
   getListFollowersIdByAccountId,
@@ -10,56 +9,68 @@ import {
 } from "@/action/follows/get";
 import { getListAccountsByListAccountIds } from "@/action/account/get";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
-import { Loader } from "lucide-react";
 import { AccountAvatar } from "../others/account-avatar";
 import { ErrorMessage } from "../others/error-message";
+import { FollowButton } from "../others/follow-button";
+import { RemoveFollowerButton } from "./remove-follower-button";
+import { Loading } from "../others/loading";
 
 interface Props {
+  currentAccountId: string;
   profileOwner: Account;
+  isYourProfile: boolean;
   type: "followers" | "following";
   counts: number;
 }
 
-export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
+export const FollowsButton = ({
+  currentAccountId,
+  profileOwner,
+  isYourProfile,
+  type,
+  counts,
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [listAccountIds, setListAccountIds] = useState<string[] | null>();
   const [listFollowsAccounts, setListFollowsAccounts] = useState<
     Account[] | null
   >();
+  const [listIsFollowedByCurrentAccount, setListIsFollowedByCurrentAccount] =
+    useState<boolean[] | null>();
 
   useEffect(() => {
     if (isOpen) {
-      if (listAccountIds === undefined) {
-        console.log("fetch");
-        const fetch = async () => {
-          if (type === "followers") {
-            const list = await getListFollowersIdByAccountId(profileOwner.id);
-            if (list === undefined) {
-              console.error("Fetch failed");
-              setListFollowsAccounts([]);
-            } else if (list === null) {
-              setListAccountIds(null);
-              setListFollowsAccounts(null);
-            } else {
-              setListAccountIds(list);
-            }
-          } else if (type === "following") {
-            const list = await getListFollowingIdByAccountId(profileOwner.id);
-            if (list === undefined) {
-              console.error("Fetch failed");
-              setListFollowsAccounts([]);
-            } else if (list === null) {
-              setListAccountIds(null);
-              setListFollowsAccounts(null);
-            } else {
-              setListAccountIds(list);
-            }
+      const fetch = async () => {
+        if (type === "followers") {
+          const list = await getListFollowersIdByAccountId(profileOwner.id);
+          if (list === undefined) {
+            // setListFollowsAccounts === [] để hiển thị thông báo lỗi
+            setListAccountIds(undefined);
+            setListFollowsAccounts([]);
+          } else if (list === null) {
+            setListAccountIds(null);
+            setListFollowsAccounts(null);
+          } else {
+            setListAccountIds(list);
           }
-        };
-        fetch();
-      }
+        } else if (type === "following") {
+          const list = await getListFollowingIdByAccountId(profileOwner.id);
+          if (list === undefined) {
+            setListAccountIds(undefined);
+            setListFollowsAccounts([]);
+          } else if (list === null) {
+            setListAccountIds(null);
+            setListFollowsAccounts(null);
+          } else {
+            setListAccountIds(list);
+          }
+        }
+      };
+      fetch();
+    } else {
+      setListAccountIds(undefined);
+      setListFollowsAccounts(undefined);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -68,7 +79,26 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
       const fetch = async () => {
         const list = await getListAccountsByListAccountIds(listAccountIds);
         if (list === undefined) {
+          setListFollowsAccounts([]);
         } else {
+          if (list) {
+            const listFollowingId = await getListFollowingIdByAccountId(
+              currentAccountId
+            );
+            if (listFollowingId === undefined) {
+              setListFollowsAccounts([]);
+            } else if (listFollowingId === null) {
+              setListIsFollowedByCurrentAccount(null);
+            } else {
+              const listIds = listAccountIds.map((id) => {
+                return list.some((acc) => acc.id === id);
+              });
+
+              setListIsFollowedByCurrentAccount(listIds);
+            }
+          } else {
+            setListIsFollowedByCurrentAccount(null);
+          }
           setListFollowsAccounts(list);
         }
       };
@@ -79,10 +109,6 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
   }, [listAccountIds]);
 
   const handleClick = () => {
-    if (counts === 0) {
-      setListAccountIds(null);
-      setListFollowsAccounts(null);
-    }
     setIsOpen(true);
   };
 
@@ -104,23 +130,41 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
             <h5 className="py-3 text-center font-bold">
               {type === "followers" ? "Followers" : "Following"}
             </h5>
-            <div className="w-[min(100vw-24px,400px)] p-6 border space-y-4 rounded-lg shadow-md dark:bg-coffee-bean dark:border-jet">
-              {listFollowsAccounts === undefined ? (
-                <div className="w-full">
-                  <Loader className="mx-auto animate-slow-spin" />
+            <div className="w-[min(100vw-24px,400px)] p-6 border rounded-lg shadow-md dark:bg-coffee-bean dark:border-jet">
+              {listFollowsAccounts === undefined ||
+              listIsFollowedByCurrentAccount === undefined ? (
+                <div className="w-full py-2.5">
+                  <Loading className="size-5" />
                 </div>
               ) : listFollowsAccounts === null ? (
-                <p className="text-center text-sm text-neutral-400">
+                <p className="py-2.5 text-center text-sm text-neutral-400">
                   {type === "followers"
-                    ? `${profileOwner.userName} has no followers.`
+                    ? isYourProfile
+                      ? "You have no followers."
+                      : `${profileOwner.userName} has no followers.`
+                    : isYourProfile
+                    ? "You don't follow anyone yet."
                     : `${profileOwner.userName} doesn't follow anyone yet.`}
                 </p>
               ) : listFollowsAccounts.length === 0 ? (
                 <ErrorMessage />
               ) : (
-                listFollowsAccounts.map((account, id) => (
-                  <FollowsItem key={id} account={account} />
-                ))
+                <div className="space-y-4 animate-fade-in">
+                  {listFollowsAccounts.map((account, i) => (
+                    <FollowsItem
+                      key={account.id}
+                      currentAccountId={currentAccountId}
+                      targetAccount={account}
+                      type={type}
+                      isYourProfile={isYourProfile}
+                      isFollowedByCurrentAccount={
+                        listIsFollowedByCurrentAccount
+                          ? listIsFollowedByCurrentAccount[i]
+                          : false
+                      }
+                    />
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -131,27 +175,46 @@ export const FollowsButton = ({ profileOwner, type, counts }: Props) => {
 };
 
 interface ItemProps {
-  account: Account;
+  currentAccountId: string;
+  isYourProfile: boolean;
+  targetAccount: Account;
+  type: "followers" | "following";
+  isFollowedByCurrentAccount: boolean;
 }
 
-const FollowsItem = ({ account }: ItemProps) => {
+const FollowsItem = ({
+  currentAccountId,
+  isYourProfile,
+  targetAccount,
+  type,
+  isFollowedByCurrentAccount,
+}: ItemProps) => {
   return (
     <div className="flex items-center">
       <AccountAvatar
-        account={account}
+        account={targetAccount}
         sizes="80px"
         className="shrink-0 size-10 mr-3"
       />
       <div className="flex-1">
-        <Link href={`@${account.userName}`} className="font-bold">
-          {account.userName}
+        <Link href={`@${targetAccount.userName}`} className="font-bold">
+          {targetAccount.userName}
         </Link>
       </div>
-      {/* <div className="shrink-0">
-        <button className="p-2 rounded-md text-sm font-medium dark:bg-neutral-100 dark:text-neutral-800">
-          Remove
-        </button>
-      </div> */}
+      <div className="shrink-0 w-20">
+        {isYourProfile && type === "followers" ? (
+          <RemoveFollowerButton
+            currentAccountId={currentAccountId}
+            targetAccount={targetAccount}
+          />
+        ) : (
+          <FollowButton
+            currentAccountId={currentAccountId}
+            targetAccount={targetAccount}
+            isFollowedByCurrentAccount={isFollowedByCurrentAccount}
+          />
+        )}
+      </div>
     </div>
   );
 };

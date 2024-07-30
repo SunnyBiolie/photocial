@@ -5,7 +5,8 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { createNewPost } from "@/action/post/create";
 import { useCreateNewPost } from "@/hooks/use-create-new-post";
-import { useAccount } from "@/hooks/use-account";
+import { useCurrentAccount } from "@/hooks/use-current-account";
+import { useProfilePageData } from "@/hooks/use-profile-page-data";
 import { StateHeader } from "../state-header";
 import { FinalPreviews } from "../final-previews";
 import { FinalMoreSettings } from "../final-more-settings";
@@ -18,7 +19,9 @@ export type PostSettings = {
 };
 
 export const CNP_FinalState_MD = () => {
-  const { account } = useAccount();
+  const { setListPostsOfCurrentAccount, setCurrentAccountNumberOf } =
+    useProfilePageData();
+  const { currentAccount } = useCurrentAccount();
 
   const {
     setState,
@@ -35,12 +38,14 @@ export const CNP_FinalState_MD = () => {
     turnOffCmt: false,
   });
 
-  if (!account) return;
+  if (!currentAccount) return;
 
   const handleBack = () => {
     setDialog({
-      title: "Back to edit?",
+      titleType: "message",
+      titleContent: "Back to edit?",
       message: "If you leave, your changes won't be saved.",
+      type: "warning",
       acceptText: "Back",
       handleAccept: () => {
         if (!arrCroppedImgData)
@@ -63,7 +68,8 @@ export const CNP_FinalState_MD = () => {
     let type: string;
 
     setDialog({
-      title: "Share this post?",
+      titleType: "message",
+      titleContent: "Share this post?",
       message: "This post will be shared with everyone.",
       type: "double-check",
       acceptText: "Share it",
@@ -88,6 +94,8 @@ export const CNP_FinalState_MD = () => {
 
         if (type === "success") {
           setImageFiles(undefined);
+          setListPostsOfCurrentAccount(undefined);
+          setCurrentAccountNumberOf(undefined);
         } else if (type === "error") {
         }
       },
@@ -113,14 +121,16 @@ export const CNP_FinalState_MD = () => {
           <div className="flex items-center gap-x-3 my-4 mx-4">
             <div className="relative size-7 rounded-full overflow-hidden">
               <Image
-                src={account.imageUrl || ""}
+                src={currentAccount.imageUrl || ""}
                 alt=""
                 fill
                 sizes="auto"
                 className="object-cover"
               />
             </div>
-            <span className="text-sm font-semibold">{account.userName}</span>
+            <span className="text-sm font-semibold">
+              {currentAccount.userName}
+            </span>
           </div>
           <PostCaption
             caption={caption}

@@ -29,7 +29,9 @@ export const ViewFull = () => {
       if (ar <= aspectRatio) setIsFullWidth(true);
       else setIsFullWidth(false);
     }
-  }, [aspectRatio]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Thiết đặt các phím tắt
   useEffect(() => {

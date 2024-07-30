@@ -1,17 +1,19 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { checkAccountLikedPost, getAccountByAccountId } from "../account/get";
-import { getListCommentsByPostId } from "../comment/get";
 
 export const countPostsByUserId = async (userId: string) => {
-  const quantity = await prisma.post.count({
-    where: {
-      authorId: userId,
-    },
-  });
+  try {
+    const quantity = await prisma.post.count({
+      where: {
+        authorId: userId,
+      },
+    });
 
-  return quantity;
+    return quantity === 0 ? null : quantity;
+  } catch (err) {
+    return undefined;
+  }
 };
 
 export const getListPostsByAccountId = async (userId: string) => {
@@ -63,19 +65,41 @@ export const countPostLikes = async (postId: string) => {
   }
 };
 
-export const getListPostsByFollowing = async () => {};
+export const getListPostsByListFollowingId = async (
+  listFollowingId: string[]
+) => {
+  try {
+    const list = await prisma.post.findMany({
+      where: {
+        authorId: {
+          in: listFollowingId,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-// Chưa try - catch
-export const getPostRelatedData = async (userId: string, postId: string) => {
-  const post = await getPostByPostId(postId);
-  if (post) {
-    const isLiked = await checkAccountLikedPost(userId, postId);
-    const likeCounts = await countPostLikes(postId);
-    const comments = await getListCommentsByPostId(postId);
+    return list.length === 0 ? null : list;
+  } catch (err) {
+    return undefined;
+  }
+};
 
-    const author = await getAccountByAccountId(post.authorId);
+export const getListPostsSavedByUserName = async (userName: string) => {
+  try {
+    const list = await prisma.post.findMany({
+      where: {
+        listSavedBy: {
+          some: {
+            userName: userName,
+          },
+        },
+      },
+    });
 
-    if (isLiked !== undefined && likeCounts !== undefined && author)
-      return { post, isLiked, likeCounts, comments, author };
+    return list.length === 0 ? null : list;
+  } catch (err) {
+    return undefined;
   }
 };

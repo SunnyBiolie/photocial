@@ -42,3 +42,39 @@ export const updateAccountLikedPost = async (
     return undefined;
   }
 };
+
+export const updateSavedPost = async (
+  currentAccountId: string,
+  postId: string,
+  action: "save" | "unsave"
+) => {
+  try {
+    if (action === "save") {
+      await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          listSavedBy: {
+            connect: { id: currentAccountId },
+          },
+        },
+      });
+    } else {
+      await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          listSavedBy: {
+            disconnect: { id: currentAccountId },
+          },
+        },
+      });
+    }
+
+    return true;
+  } catch (error) {
+    return true;
+  }
+};

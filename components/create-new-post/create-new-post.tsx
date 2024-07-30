@@ -22,9 +22,11 @@ import { CNP_SectionInput_MD } from "./section-input";
 import { CNP_AdvancedCrop_MD } from "./md-screen/section-advanced-crop";
 import { CNP_SectionCrop_MD } from "./md-screen/section-crop";
 import { CNP_FinalState_MD } from "./md-screen/section-final";
-import { Dialog, DialogProps } from "./dialog";
+import { Dialog } from "./dialog";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
 import { CNP_SectionCrop } from "./section-crop";
+import { useOpenCreatePost } from "@/hooks/use-open-create-post";
+import { DialogProps } from "@/types/others";
 
 type CreateNewPostContextType = {
   setState: Dispatch<SetStateAction<CreatePostState>>;
@@ -47,12 +49,9 @@ export const CreateNewPostContext = createContext<
   CreateNewPostContextType | undefined
 >(undefined);
 
-interface Props {
-  isShow: boolean;
-  setIsShow: Dispatch<SetStateAction<boolean>>;
-}
+export const CreateNewPost = () => {
+  const { isOpen, onClose } = useOpenCreatePost();
 
-export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
   const { isMedium } = useBreakpoint();
 
   const [state, setState] = useState<CreatePostState>("se");
@@ -165,7 +164,7 @@ export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageFiles]);
 
-  if (!isShow) return;
+  if (!isOpen) return;
 
   return (
     <CreateNewPostContext.Provider
@@ -219,14 +218,16 @@ export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
           className="absolute size-full top-0 left-0 dark:bg-neutral-950/75 backdrop-blur-sm"
           onClick={() => {
             if (state === "se") {
-              setIsShow(false);
+              onClose();
             } else {
               setDialog({
-                title: "Discard post?",
+                titleType: "message",
+                titleContent: "Discard post?",
                 message: "If you leave, your edits won't be saved.",
+                type: "warning",
                 acceptText: "Discard",
                 handleAccept: () => {
-                  setIsShow(false);
+                  onClose();
                   setImageFiles(undefined);
                   arrCroppedImgData?.forEach((item) => {
                     URL.revokeObjectURL(item.croppedURL);
@@ -243,7 +244,8 @@ export const CreateNewPost = ({ isShow, setIsShow }: Props) => {
         </div>
         {dialog && (
           <Dialog
-            title={dialog.title}
+            titleType="message"
+            titleContent={dialog.titleContent}
             message={dialog.message}
             type={dialog.type}
             acceptText={dialog.acceptText}

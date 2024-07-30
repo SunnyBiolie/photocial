@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useFirstRender } from "@/hooks/use-first-render";
-import { useHomeState } from "@/hooks/use-home-state";
+import { useHomePageData } from "@/hooks/use-home-state";
 import { updateAccountLikedPost } from "@/action/post/update";
 import { Heart } from "lucide-react";
 
@@ -26,7 +26,7 @@ export const LikeButton = ({
   setLikeCounts,
   className,
 }: Props) => {
-  const hs = useHomeState();
+  const { postCards } = useHomePageData();
 
   const debounceValue = useDebounce(isLiked);
   const isFirstRender = useFirstRender();
@@ -38,10 +38,14 @@ export const LikeButton = ({
 
     if (isFirstRender || isError) return;
 
-    console.log("Not first render", isLiked);
     const updateLikeStatus = async () => {
-      const res = await updateAccountLikedPost(userId, postId, debounceValue);
-      if (!res) {
+      const result = await updateAccountLikedPost(
+        userId,
+        postId,
+        debounceValue
+      );
+      if (!result) {
+        // Hoàn tác UI nếu có lỗi, kiểm tra isError để không bị render loop
         setIsError(true);
         setIsLiked(!isLiked);
         setLikeCounts((prev) => {
@@ -50,7 +54,17 @@ export const LikeButton = ({
             else return prev + 1;
           }
         });
-        toast.error("Something went wrong!");
+
+        if (postCards) {
+          const index = postCards.findIndex((item) => {
+            return item.post.id === postId;
+          });
+          postCards[index].likeStatus = !isLiked;
+          postCards[index].likeCounts! += isLiked ? -1 : 1;
+          console.log("INLIKEBUTTON");
+        }
+
+        toast.error("Something went wrong, try again later.");
       }
     };
     updateLikeStatus();
@@ -67,12 +81,12 @@ export const LikeButton = ({
       }
     });
 
-    if (hs.data) {
-      const index = hs.data.findIndex((item, i) => {
+    if (postCards) {
+      const index = postCards.findIndex((item) => {
         return item.post.id === postId;
       });
-      hs.data[index].likeStatus = !isLiked;
-      hs.data[index].likeCounts! += isLiked ? -1 : 1;
+      postCards[index].likeStatus = !isLiked;
+      postCards[index].likeCounts! += isLiked ? -1 : 1;
     }
   };
 

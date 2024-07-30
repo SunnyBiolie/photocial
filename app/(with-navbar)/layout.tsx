@@ -1,12 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useBreakpoint } from "@/hooks/use-breakppoint";
 import { CreateNewPost } from "@/components/create-new-post/create-new-post";
 import { AppNavigationBar } from "@/components/others/app-navbar";
 import { ViewAccountAvatar } from "@/components/others/view-account-avatar";
 import { ViewFull } from "@/components/others/view-full";
-import { useBreakpoint } from "@/hooks/use-breakppoint";
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useOpenCreatePost } from "@/hooks/use-open-create-post";
+import { AppDialog } from "@/components/others/app-dialog";
+import { useCurrentAccount } from "@/hooks/use-current-account";
+import Image from "next/image";
 
 interface Props {
   children: React.ReactNode;
@@ -14,9 +18,10 @@ interface Props {
 }
 
 export default function WithNavbarLayout({ children, modal }: Props) {
-  const { isMedium, setIsMedium } = useBreakpoint();
+  const { currentAccount } = useCurrentAccount();
+  const { onOpen } = useOpenCreatePost();
 
-  const [isCreatingNewPost, setIsCreatingNewPost] = useState(false);
+  const { isMedium, setIsMedium } = useBreakpoint();
 
   useEffect(() => {
     const handleDisplayStyle = () => {
@@ -36,23 +41,17 @@ export default function WithNavbarLayout({ children, modal }: Props) {
     };
   }, [setIsMedium]);
 
-  useEffect(() => {
-    if (isCreatingNewPost) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
-  }, [isCreatingNewPost]);
-
   return (
     <>
-      <div className="w-full h-full">
-        {/* <div className="mx-auto w-[calc(72vh)] min-w-[302px] max-w-[632px]"> */}
+      <div className="w-full min-h-full">
         <div className="w-full pb-[var(--app-navbar-horizontal-height)] md:px-[var(--app-navbar-vertical-width)] md:pb-0">
           {children}
         </div>
-        <AppNavigationBar setIsCreatingNewPost={setIsCreatingNewPost} />
+        <AppNavigationBar />
         {isMedium && (
           <div
             className="fixed bottom-8 right-8 size-16 rounded-full border shadow-md cursor-pointer hover:scale-110 transition-all dark:bg-coffee-bean dark:border-unselected"
-            onClick={() => setIsCreatingNewPost(true)}
+            onClick={() => onOpen()}
           >
             <Plus
               strokeWidth={2.5}
@@ -60,16 +59,31 @@ export default function WithNavbarLayout({ children, modal }: Props) {
             />
           </div>
         )}
-        {isMedium !== undefined && (
-          <CreateNewPost
-            isShow={isCreatingNewPost}
-            setIsShow={setIsCreatingNewPost}
-          />
-        )}
+        {isMedium !== undefined && <CreateNewPost />}
       </div>
       {modal}
       <ViewFull />
       <ViewAccountAvatar />
+      <AppDialog />
+      {!currentAccount && (
+        <div className="fixed top-0 left-0 size-full bg-rich-black z-50">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse">
+            <div className="flex flex-col items-center">
+              <Image
+                src="/favicon.ico"
+                alt="Photocial's icon"
+                width={128}
+                height={128}
+              />
+            </div>
+          </div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse">
+            <h1 className="text-lg font-medium dark:text-neutral-400">
+              Photocial
+            </h1>
+          </div>
+        </div>
+      )}
     </>
   );
 }

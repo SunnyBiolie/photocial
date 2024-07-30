@@ -1,11 +1,7 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getAccountByUserName } from "@/action/account/get";
-import { countPostsByUserId } from "@/action/post/get";
-import { ProfileNavigationBar } from "@/components/profile/profile-navbar";
-import { ProfileAvatar } from "@/components/profile/profile-avatar";
-import { ProfileInfor } from "@/components/profile/profile-infor";
-import { countFollowers, countFollowing } from "@/action/follows/get";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -14,10 +10,19 @@ export async function generateMetadata({
     username: string;
   };
 }): Promise<Metadata> {
-  return {
-    title: `@${params.username} on Photocial`,
-    description: `@${params.username}'s profile`,
-  };
+  const profileOwner = await getAccountByUserName(params.username);
+
+  if (profileOwner)
+    return {
+      title: `@${params.username} on Photocial`,
+      description: `@${params.username}'s profile`,
+    };
+  else
+    return {
+      title: `Page not found`,
+      description: `The link you followed may be broken, or the page may have been
+          removed`,
+    };
 }
 
 interface Props {
@@ -31,28 +36,38 @@ export default async function ProfileLayout({ params, children }: Props) {
   const profileOwner = await getAccountByUserName(params.username);
 
   if (profileOwner === undefined)
-    throw new Error(
-      `Some thing went wrong when fetching account with username: "${params.username}"`
+    return (
+      <div className="fixed top-0 left-0 size-full">
+        <div className="w-[min(100%,400px)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-y-6 text-center">
+          <h2 className="text-lg font-bold">Something went wrong.</h2>
+          <p className="dark:text-neutral-400">
+            An error occurred while trying to access the database. Please check
+            your connection and try again, or contact support for assistance.
+          </p>
+        </div>
+      </div>
     );
 
-  if (profileOwner === null) return notFound();
-
-  const numberOfPosts = await countPostsByUserId(profileOwner.id);
-  const numberOfFollowers = await countFollowers(profileOwner.id);
-  const numberOfFollowing = await countFollowing(profileOwner.id);
-
-  return (
-    <div className="w-[calc(100vw-24px)] md:px-0 md:w-full">
-      <ProfileInfor
-        profileOwner={profileOwner}
-        numberOfPosts={numberOfPosts}
-        numberOfFollowers={numberOfFollowers}
-        numberOfFollowing={numberOfFollowing}
-      />
-      <div className="max-w-[916px] mx-2 md:mx-auto">
-        <ProfileNavigationBar userName={profileOwner.userName} />
-        <div className="py-4">{children}</div>
+  if (profileOwner === null)
+    return (
+      <div className="fixed top-0 left-0 size-full">
+        <div className="w-[min(100%,320px)] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-y-6 text-center">
+          <h2 className="text-lg font-bold">
+            Sorry, this page isn&#39;t available.
+          </h2>
+          <p className="dark:text-neutral-500">
+            The link you followed may be broken, or the page may have been
+            removed.
+          </p>
+          <Link
+            href="/"
+            className="w-fit px-4 py-2 rounded-lg text-sm font-semibold dark:bg-normal dark:text-jet"
+          >
+            Back to Photocial
+          </Link>
+        </div>
       </div>
-    </div>
-  );
+    );
+
+  return <>{children}</>;
 }

@@ -1,4 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Page not found`,
+    description: `The link you followed may be broken, or the page may have been removed`,
+  };
+}
 
 export default function NotFound() {
   return (
@@ -13,7 +21,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="w-fit px-4 py-2 rounded-lg font-semibold dark:bg-normal dark:text-coffee-bean"
+          className="w-fit px-4 py-2 rounded-lg text-sm font-semibold dark:bg-normal dark:text-jet"
         >
           Back to Photocial
         </Link>

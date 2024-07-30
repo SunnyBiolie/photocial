@@ -53,6 +53,28 @@ export const checkAccountLikedPost = async (
   }
 };
 
+export const checkAccountSavedPost = async (
+  accountId: string,
+  postId: string
+) => {
+  try {
+    const account = await prisma.account.findFirst({
+      where: {
+        id: accountId,
+        listSavedPost: {
+          some: {
+            id: postId,
+          },
+        },
+      },
+    });
+
+    return account ? true : false;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const getListAccountsByListAccountIds = async (accountIds: string[]) => {
   try {
     const list = await prisma.account.findMany({

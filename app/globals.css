@@ -6,7 +6,16 @@
 html,
 body {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+
+  --normal: rgb(0, 0, 0);
+  --unselected: rgb(82, 82, 82);
 
   --rich-black: #0a0a0a;
   --black-chocolate: #100d08;
@@ -17,19 +26,6 @@ body {
   --app-navbar-horizontal-height: 68px;
 }
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-
-  --normal: rgb(0, 0, 0);
-  --unselected: rgb(82, 82, 82);
-}
-
-/* body {
-  overflow-y: scroll;
-} */
-
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 229, 229, 229;
@@ -38,6 +34,10 @@ body {
 
     --normal: rgb(229, 229, 229);
     --unselected: rgb(82, 82, 82);
+  }
+  ::selection {
+    color: #232425;
+    background: #f1f1f1;
   }
 }
 

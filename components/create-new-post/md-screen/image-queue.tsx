@@ -225,8 +225,10 @@ const ImageQueueItem_MD = ({ imgPreCropData, index, style }: ItemProps) => {
               className="absolute top-1 right-1 p-1 rounded-full bg-neutral-800/75 cursor-pointer"
               onClick={() =>
                 setDialog({
-                  title: "Discard photo?",
+                  titleType: "message",
+                  titleContent: "Discard photo?",
                   message: "This will remove the photo from your post.",
+                  type: "warning",
                   acceptText: "Discard",
                   handleAccept: () => {
                     handleRemoveImage();

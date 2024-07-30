@@ -1,6 +1,6 @@
 "use client";
 
-import { AccountContextProvider } from "@/hooks/use-account";
+import { AccountContextProvider } from "@/hooks/use-current-account";
 
 export const AccountProvider = ({
   children,

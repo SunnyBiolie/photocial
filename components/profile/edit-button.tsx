@@ -5,7 +5,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
 import { Account } from "@prisma/client";
-import { UpdateProfileData } from "@/types/others";
+import { UpdateProfileData } from "@/types/profile";
 import { updateAccount } from "@/action/account/update";
 import { ImageUp, Loader } from "lucide-react";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
@@ -13,10 +13,10 @@ import { Loading } from "../others/loading";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  yourAccount: Account;
+  currentAccount: Account;
 }
 
-export const EditProfileButton = ({ yourAccount }: Props) => {
+export const EditProfileButton = ({ currentAccount }: Props) => {
   const { user } = useUser();
 
   const inputRef = useRef<ElementRef<"input">>(null);
@@ -135,8 +135,8 @@ export const EditProfileButton = ({ yourAccount }: Props) => {
                     onClick={changeAvatar}
                   >
                     <Image
-                      src={newImageURL ? newImageURL : yourAccount.imageUrl}
-                      alt={`${yourAccount.userName}'s avatar`}
+                      src={newImageURL ? newImageURL : currentAccount.imageUrl}
+                      alt={`${currentAccount.userName}'s avatar`}
                       fill
                       sizes="256px"
                       className="object-cover"

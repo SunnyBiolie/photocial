@@ -10,7 +10,7 @@ import {
   getListRepliesByCommentIdAndTime,
 } from "@/action/comment/get";
 import { getAccountByAccountId } from "@/action/account/get";
-import { useAccount } from "@/hooks/use-account";
+import { useCurrentAccount } from "@/hooks/use-current-account";
 
 interface Props {
   author: Account;
@@ -27,7 +27,7 @@ export const CommentItem = ({
   arrayNewReplies,
   className,
 }: Props) => {
-  const { account } = useAccount();
+  const { currentAccount } = useCurrentAccount();
 
   const [requestTime, setRequestTime] = useState<Date>();
   const [numberOfReplies, setNumberOfReplies] = useState<number | null>();

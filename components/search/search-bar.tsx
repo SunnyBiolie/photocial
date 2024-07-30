@@ -8,30 +8,34 @@ import { SearchIcon } from "lucide-react";
 
 interface Props {
   setSearchResult: Dispatch<SetStateAction<Account[] | null | undefined>>;
-  setIsLoading: Dispatch<SetStateAction<boolean>>;
+  setIsSearching: Dispatch<SetStateAction<boolean>>;
+  setIsError: Dispatch<SetStateAction<boolean>>;
 }
 
-export const SearchBar = ({ setSearchResult, setIsLoading }: Props) => {
+export const SearchBar = ({
+  setSearchResult,
+  setIsSearching,
+  setIsError,
+}: Props) => {
   const [searchText, setSearchText] = useState<string>("");
 
   const debounceValue = useDebounce(searchText);
 
   useEffect(() => {
-    console.log(debounceValue);
     if (!debounceValue) {
       setSearchResult(undefined);
       return;
     }
 
     const fetch = async () => {
-      setIsLoading(true);
+      setIsSearching(true);
       const list = await getListAccountsBySearchUserName(debounceValue);
       if (list === undefined) {
-        setSearchResult([]);
+        setIsError(true);
       } else {
         setSearchResult(list);
       }
-      setIsLoading(false);
+      setIsSearching(false);
     };
     fetch();
 

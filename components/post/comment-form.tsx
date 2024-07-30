@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Comment } from "@prisma/client";
 import { createComment, createReply } from "@/action/comment/create";
-import { useAccount } from "@/hooks/use-account";
+import { useCurrentAccount } from "@/hooks/use-current-account";
 import { IoClose } from "react-icons/io5";
 import { ReplyInfo } from "@/types/others";
 import Image from "next/image";
@@ -34,7 +34,7 @@ export const CommentForm = ({
   setReplyInfo,
   className,
 }: Props) => {
-  const { account } = useAccount();
+  const { currentAccount } = useCurrentAccount();
 
   const ref = useRef<ElementRef<"textarea">>(null);
 
@@ -55,14 +55,14 @@ export const CommentForm = ({
     }
   }, [replyInfo]);
 
-  if (!account) return;
+  if (!currentAccount) return;
 
   const handleSubmitForm = async () => {
     if (content && !isPosting) {
       setIsPosting(true);
       // !replyInfo nguời dùng bình luận trực tiếp cho bài post, ngược lại là đang reply một comment
       if (!replyInfo) {
-        const cmt = await createComment(account.id, postId, content);
+        const cmt = await createComment(currentAccount.id, postId, content);
         if (cmt) {
           toast.success("Your content has been posted successfully");
           setListNewComments((prev) => {
@@ -77,7 +77,7 @@ export const CommentForm = ({
       } else {
         // replyInfo được xử lý trong comment-item.tsx
         const reply = await createReply(
-          account.id,
+          currentAccount.id,
           postId,
           replyInfo.parentId,
           replyInfo.commentId,
@@ -120,7 +120,7 @@ export const CommentForm = ({
     <div className={cn("py-2 flex items-center gap-x-3", className)}>
       <div className="shrink-0 size-8 relative rounded-full overflow-hidden">
         <Image
-          src={account.imageUrl}
+          src={currentAccount.imageUrl}
           alt="Your avatar"
           fill
           sizes="auto"

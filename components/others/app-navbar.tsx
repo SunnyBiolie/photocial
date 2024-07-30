@@ -1,16 +1,18 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { useEffect } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useAccount } from "@/hooks/use-account";
+import { useCurrentAccount } from "@/hooks/use-current-account";
 import { useBreakpoint } from "@/hooks/use-breakppoint";
 import { ItemNavigation } from "./item-navigation";
 import { type IconType } from "react-icons";
 import {
   AlignLeft,
   Bell,
+  LogOut,
   LucideIcon,
   Pin,
   SearchIcon,
@@ -19,11 +21,9 @@ import {
 } from "lucide-react";
 import { BiHomeAlt2 } from "react-icons/bi";
 import { ItemPopup } from "./item-popup";
-
-interface Props {
-  setIsCreatingNewPost: Dispatch<SetStateAction<boolean>>;
-  className?: string;
-}
+import { useOpenCreatePost } from "@/hooks/use-open-create-post";
+import { useHomePageData } from "@/hooks/use-home-state";
+import { SignOutButton } from "@clerk/nextjs";
 
 export interface NavItem {
   title: string;
@@ -32,19 +32,22 @@ export interface NavItem {
   Icon: IconType | LucideIcon;
 }
 
-export const AppNavigationBar = ({
-  setIsCreatingNewPost,
-  className,
-}: Props) => {
+interface Props {
+  className?: string;
+}
+
+export const AppNavigationBar = ({ className }: Props) => {
+  const { onOpen } = useOpenCreatePost();
+  const { setPostCards } = useHomePageData();
   const { isMedium } = useBreakpoint();
-  const { account } = useAccount();
+  const { currentAccount } = useCurrentAccount();
 
   const pathname = usePathname();
 
   let mainItem: NavItem[] = [];
 
   useEffect(() => {
-    if (!account) return;
+    if (!currentAccount) return;
 
     let check = false;
     mainItem.forEach((item) => {
@@ -54,11 +57,11 @@ export const AppNavigationBar = ({
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, pathname]);
+  }, [currentAccount, pathname]);
 
   if (isMedium === undefined) return;
 
-  if (!account) return;
+  if (!currentAccount) return;
 
   mainItem = [
     {
@@ -81,8 +84,8 @@ export const AppNavigationBar = ({
     },
     {
       title: "Profile",
-      href: `/@${account.userName}`,
-      isActive: pathname.split("/")[1] === `@${account.userName}`,
+      href: `/@${currentAccount.userName}`,
+      isActive: pathname.split("/")[1] === `@${currentAccount.userName}`,
       Icon: UserRound,
     },
   ];
@@ -90,21 +93,21 @@ export const AppNavigationBar = ({
   return (
     <div
       className={cn(
-        "fixed w-full h-[var(--app-navbar-horizontal-height)] top-full -translate-y-full left-0 flex items-center justify-between bg-rich-black md:h-full md:w-[var(--app-navbar-vertical-width)] md:flex-col",
+        "fixed w-full h-[var(--app-navbar-horizontal-height)] top-full -translate-y-full left-0 flex items-center justify-between bg-rich-black md:h-full md:w-[var(--app-navbar-vertical-width)] md:flex-col z-10",
         className
       )}
     >
       <div className="py-4">
         {isMedium && (
-          <Link href="/" className="">
-            <div className="relative size-10 rounded-full overflow-hidden bg-sky-500">
-              {/* <Image
-              src={""}
-              alt="Photocial's logo"
-              fill
-              sizes="auto"
-              className="object-cover"
-            /> */}
+          <Link href="/" onClick={() => setPostCards(undefined)}>
+            <div className="relative size-10 rounded-full overflow-hidden bg-neutral-800">
+              <Image
+                src={"/favicon.ico"}
+                alt="Photocial's logo"
+                fill
+                sizes="auto"
+                className="object-cover"
+              />
             </div>
           </Link>
         )}
@@ -125,7 +128,7 @@ export const AppNavigationBar = ({
         {!isMedium && (
           <div
             className="group relative size-full flex items-center justify-center cursor-pointer md:size-[60px] order-1"
-            onClick={() => setIsCreatingNewPost(true)}
+            onClick={() => onOpen()}
           >
             <div className="relative z-10">
               <SquarePen
@@ -138,8 +141,24 @@ export const AppNavigationBar = ({
       </nav>
       {isMedium && (
         <div className="mb-5">
-          <ItemPopup Icon={Pin} />
-          <ItemPopup Icon={AlignLeft} />
+          <ItemPopup Icon={Pin}>
+            <div className="p-2">
+              <p className="text-center text-sm font-medium text-neutral-400">
+                Comming soon!
+              </p>
+            </div>
+          </ItemPopup>
+          <ItemPopup Icon={AlignLeft}>
+            <SignOutButton>
+              <button
+                className="w-full p-2.5 rounded-md flex items-center justify-between hover:bg-jet transition-all"
+                onClick={() => {}}
+              >
+                <span className="font-medium">Log out</span>
+                <LogOut className="size-5" />
+              </button>
+            </SignOutButton>
+          </ItemPopup>
         </div>
       )}
     </div>

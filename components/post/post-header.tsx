@@ -1,20 +1,27 @@
 "use client";
 
-import Image from "next/image";
 import { Post, Account } from "@prisma/client";
 import { cn, transformTime } from "@/lib/utils";
-import { GoDotFill } from "react-icons/go";
-import { IoIosMore } from "react-icons/io";
 import { AccountAvatar } from "../others/account-avatar";
+import { PostMoreOptions } from "./post-more-options";
+import { GoDotFill } from "react-icons/go";
+import Link from "next/link";
 
 interface Props {
   post: Post;
   author: Account | undefined;
+  inModal: boolean;
   isInCard?: boolean;
   className?: string;
 }
 
-export const PostHeader = ({ post, author, isInCard, className }: Props) => {
+export const PostHeader = ({
+  post,
+  author,
+  inModal,
+  isInCard,
+  className,
+}: Props) => {
   if (!author) return <PostHeaderSkeleton />;
 
   return (
@@ -23,7 +30,9 @@ export const PostHeader = ({ post, author, isInCard, className }: Props) => {
       <div className="flex-1 flex items-center justify-between">
         <div className="h-full flex flex-col justify-between">
           <div className="flex items-center gap-x-1">
-            <p className="font-semibold">{author.userName}</p>
+            <Link href={`/@${author.userName}`} className="font-semibold">
+              {author.userName}
+            </Link>
             {isInCard && (
               <>
                 <GoDotFill className="size-2 opacity-75" />
@@ -46,9 +55,7 @@ export const PostHeader = ({ post, author, isInCard, className }: Props) => {
             </div>
           )}
         </div>
-        <div className="cursor-pointer">
-          <IoIosMore className="size-5" />
-        </div>
+        <PostMoreOptions post={post} inModal={inModal} />
       </div>
     </div>
   );

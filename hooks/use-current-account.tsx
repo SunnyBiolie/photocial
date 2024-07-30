@@ -8,7 +8,7 @@ import { createAccount } from "@/action/account/create";
 
 const AccountContext = createContext<
   | {
-      account: Account | undefined;
+      currentAccount: Account | undefined;
     }
   | undefined
 >(undefined);
@@ -20,15 +20,15 @@ interface Props {
 export const AccountContextProvider = (props: Props) => {
   const { user } = useUser();
 
-  const [account, setAccount] = useState<Account>();
+  const [currentAccount, setCurrentAccount] = useState<Account>();
 
   useEffect(() => {
     if (user) {
       const init = async () => {
-        const account = await getAccountByAccountId(user.id);
-        if (account === undefined)
+        const currentAccount = await getAccountByAccountId(user.id);
+        if (currentAccount === undefined)
           throw new Error(`Prisma error: getAccountByAccountId`);
-        if (account === null) {
+        if (currentAccount === null) {
           const createdAccount = await createAccount({
             id: user.id,
             imageUrl: user.imageUrl,
@@ -36,9 +36,9 @@ export const AccountContextProvider = (props: Props) => {
             biography: null,
             isPrivate: false,
           });
-          setAccount(createdAccount);
+          setCurrentAccount(createdAccount);
         } else {
-          setAccount(account);
+          setCurrentAccount(currentAccount);
         }
       };
       init();
@@ -46,13 +46,13 @@ export const AccountContextProvider = (props: Props) => {
   }, [user]);
 
   const value = {
-    account,
+    currentAccount,
   };
 
   return <AccountContext.Provider value={value} {...props} />;
 };
 
-export const useAccount = () => {
+export const useCurrentAccount = () => {
   const context = useContext(AccountContext);
   if (context === undefined) {
     throw new Error(`useAccount must be used with AccountContextProvider`);

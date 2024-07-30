@@ -19,8 +19,10 @@ export const CNP_SectionCrop_MD = () => {
 
   const handleDiscard = () => {
     setDialog({
-      title: "Discard post?",
+      titleType: "message",
+      titleContent: "Discard post?",
       message: "If you leave, your edits won't be saved.",
+      type: "warning",
       acceptText: "Discard",
       handleAccept: () => {
         setImageFiles(undefined);

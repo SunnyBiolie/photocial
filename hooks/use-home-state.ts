@@ -1,25 +1,17 @@
 import { create } from "zustand";
-import { Account, Post } from "@prisma/client";
+import { PostCardProps } from "@/types/others";
 
-type PostProps = {
-  post: Post;
-  author?: Account;
-  likeStatus?: boolean;
-  likeCounts?: number;
-  commentCounts?: number;
-};
-
-type HomeState = {
-  data: PostProps[] | undefined;
-  setData: (data: PostProps[] | undefined) => void;
+type Props = {
+  postCards: PostCardProps[] | null | undefined;
+  setPostCards: (data: PostCardProps[] | null | undefined) => void;
   scrollPosition: number;
   setScrollPosition: (scrollPosition: number) => void;
 };
 
-export const useHomeState = create<HomeState>()((set) => ({
-  data: undefined,
-  setData: (data: PostProps[] | undefined) => {
-    set({ data });
+export const useHomePageData = create<Props>()((set) => ({
+  postCards: undefined,
+  setPostCards: (data) => {
+    set({ postCards: data });
   },
   scrollPosition: 0,
   setScrollPosition: (scrollPosition: number) => {
