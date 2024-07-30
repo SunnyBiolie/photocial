@@ -98,7 +98,7 @@ export const CNP_FinalState_MD = () => {
               const blob = new Blob([bytes]);
 
               const respone = await imageKit.upload({
-                file: blob,
+                file: Buffer.from(bytes),
                 fileName: `${currentAccount.userName}`,
                 folder: configImageKit.folderName,
               });
