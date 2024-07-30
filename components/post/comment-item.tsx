@@ -68,6 +68,8 @@ export const CommentItem = ({
     }
   }, [arrayNewReplies, comment]);
 
+  if (!currentAccount) return;
+
   const handleReplyClick = () => {
     // Nếu reply comment level 1 --> parentId = id của commnet (Cmt level 1 có parentId = postId)
     // Nếu reply comment level 2, 3... --> parentId = parentId của comment (tức bằng id của comment level 1)
@@ -190,7 +192,7 @@ export const CommentItem = ({
               listNewReplies.map((r) => (
                 <CommentItem
                   key={r.id}
-                  author={account!}
+                  author={currentAccount}
                   comment={r}
                   setReplyInfo={setReplyInfo}
                   className="animate-[create_2s_ease-out]"

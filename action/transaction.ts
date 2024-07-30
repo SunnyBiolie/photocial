@@ -1,5 +1,6 @@
 "use server";
 
+import imageKit from "@/lib/imagekit";
 import prisma from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
@@ -54,42 +55,56 @@ export const transactionDeletePost = async (
         },
       });
 
-      await prisma.$transaction(
-        [
-          prisma.post.update({
-            where: {
-              id: postId,
-            },
-            data: {
-              listLikedBy: {
-                disconnect: listLikedByAccounts,
-              },
-              listSavedBy: {
-                disconnect: listSavedByAccounts,
-              },
-            },
-          }),
-          prisma.image.deleteMany({
-            where: {
-              postId,
-            },
-          }),
-          prisma.comment.deleteMany({
-            where: {
-              postId,
-            },
-          }),
-          prisma.post.delete({
-            where: {
-              id: postId,
-              authorId: currentAccountId,
-            },
-          }),
-        ],
-        {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      const listImages = await prisma.image.findMany({
+        where: {
+          postId,
+        },
+        select: {
+          id: true,
+        },
+      });
+      const listImagesId = listImages.map((img) => img.id);
+      imageKit.bulkDeleteFiles(listImagesId, async function (error) {
+        if (error) throw error;
+        else {
+          await prisma.$transaction(
+            [
+              prisma.post.update({
+                where: {
+                  id: postId,
+                },
+                data: {
+                  listLikedBy: {
+                    disconnect: listLikedByAccounts,
+                  },
+                  listSavedBy: {
+                    disconnect: listSavedByAccounts,
+                  },
+                },
+              }),
+              prisma.image.deleteMany({
+                where: {
+                  postId,
+                },
+              }),
+              prisma.comment.deleteMany({
+                where: {
+                  postId,
+                },
+              }),
+              prisma.post.delete({
+                where: {
+                  id: postId,
+                  authorId: currentAccountId,
+                },
+              }),
+            ],
+            {
+              isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+            }
+          );
         }
-      );
+      });
     } else {
       throw new Error("Something went wrong, try again later", {
         cause:
