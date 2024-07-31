@@ -23,10 +23,19 @@ export const CropParameters = () => {
   const ratioSelectorRef = useRef<ElementRef<"div">>(null);
   const imageSelectorRef = useRef<ElementRef<"div">>(null);
 
+  const verticalReversed = [...configCropParams.vertical].reverse();
+  const horizontalReversed = [...configCropParams.horizontal].reverse();
+  const verticalDisplayReversed = [
+    ...configCropParams.verticalDisplay,
+  ].reverse();
+  const horizontalDisplayReversed = [
+    ...configCropParams.horizontalDisplay,
+  ].reverse();
+
   const [arIndex, setARIndex] = useState<number>(
-    configCropParams.vertical.toReversed().indexOf(aspectRatio) !== -1
-      ? configCropParams.vertical.toReversed().indexOf(aspectRatio)
-      : configCropParams.horizontal.toReversed().indexOf(aspectRatio)
+    verticalReversed.indexOf(aspectRatio) !== -1
+      ? verticalReversed.indexOf(aspectRatio)
+      : horizontalReversed.indexOf(aspectRatio)
   );
   const [isOpenRatioSelector, setIsOpenRatioSelector] =
     useState<boolean>(false);
@@ -189,10 +198,9 @@ export const CropParameters = () => {
               className="px-4 py-2 border-b flex items-center justify-between cursor-pointer dark:bg-neutral-900/80 dark:border-neutral-500"
               onClick={() => {
                 const d = direction === "vertical" ? "horizontal" : "vertical";
-                handleSelectDirection(
-                  d,
-                  configCropParams[d].toReversed()[arIndex]
-                );
+                const listAR =
+                  d === "vertical" ? verticalReversed : horizontalReversed;
+                handleSelectDirection(d, listAR[arIndex]);
               }}
             >
               <span className="capitalize">{direction}</span>
@@ -204,7 +212,7 @@ export const CropParameters = () => {
               />
             </div>
             {direction === "vertical"
-              ? configCropParams.vertical.toReversed().map((item, index) => (
+              ? verticalReversed.map((item, index) => (
                   <div
                     key={index}
                     className={cn(
@@ -213,11 +221,11 @@ export const CropParameters = () => {
                     )}
                     onClick={() => handleSelectAR(item, index)}
                   >
-                    {configCropParams.verticalDisplay.toReversed()[index]}
+                    {verticalDisplayReversed[index]}
                     {item === aspectRatio && <Check className="size-4" />}
                   </div>
                 ))
-              : configCropParams.horizontal.toReversed().map((item, index) => (
+              : horizontalReversed.map((item, index) => (
                   <div
                     key={index}
                     className={cn(
@@ -226,7 +234,7 @@ export const CropParameters = () => {
                     )}
                     onClick={() => handleSelectAR(item, index)}
                   >
-                    {configCropParams.horizontalDisplay.toReversed()[index]}
+                    {horizontalDisplayReversed[index]}
                     {item === aspectRatio && <Check className="size-4" />}
                   </div>
                 ))}

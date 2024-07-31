@@ -32,10 +32,11 @@ export default function ProfileSavedPage({ params }: Props) {
       if (list === undefined) {
         setListSavedPosts([]);
       } else {
+        const listReverse = list ? [...list].reverse() : null;
         if (isBelongstoCurrentAccount) {
-          setListSavedPostsOfCurrentAccount(list);
+          setListSavedPostsOfCurrentAccount(listReverse);
         }
-        setListSavedPosts(list);
+        setListSavedPosts(listReverse);
       }
     };
     fetch();
@@ -74,9 +75,7 @@ export default function ProfileSavedPage({ params }: Props) {
               <div className="bg-jet size-full aspect-square animate-pulse"></div>
             </>
           ) : (
-            listSavedPosts
-              .toReversed()
-              .map((p) => <ProfilePostItem key={p.id} post={p} />)
+            listSavedPosts.map((p) => <ProfilePostItem key={p.id} post={p} />)
           )}
         </div>
       )}

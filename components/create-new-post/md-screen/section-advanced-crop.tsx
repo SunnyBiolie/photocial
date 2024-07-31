@@ -292,12 +292,6 @@ export const CNP_AdvancedCrop_MD = () => {
 
       rightDivTarget.style.width =
         imgWidth - cropperTarget.offsetWidth - cropperTarget.offsetLeft + "px";
-      // console.log(
-      //   "Trc gan",
-      //   cropperTarget.offsetWidth,
-      //   cropperTarget.offsetLeft,
-      //   rightDivTarget.style.width
-      // );
     };
 
     const stopMove = () => {

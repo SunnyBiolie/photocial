@@ -91,7 +91,7 @@ export const RecommendedAccounts = ({ className }: Props) => {
             <SearchItemSkeleton />
             <SearchItemSkeleton />
           </div>
-        ) : listAccounts === null || listIsFollowedByCurrentAccount === null ? (
+        ) : listAccounts === null || listAccounts.length === 1 ? (
           <p className="py-4 text-center text-sm font-semibold text-neutral-400">
             No recommend for you.
           </p>

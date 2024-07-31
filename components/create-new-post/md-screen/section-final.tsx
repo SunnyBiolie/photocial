@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 "use client";
 
 import { useState } from "react";
@@ -99,6 +97,7 @@ export const CNP_FinalState_MD = () => {
             listImagesData.map(async (bytes) => {
               const blob = new Blob([bytes]);
               const respone = await imageKit.upload({
+                // @ts-ignore
                 file: blob,
                 fileName: `${currentAccount.userName}`,
                 folder: configImageKit.folderName,

@@ -258,7 +258,6 @@ const ImageQueueItem = ({
       });
       setCurrentIndex(index);
 
-      console.log(newScrollLeft);
       setScrollInfo((prev) => {
         if (Math.round(newScrollLeft) <= 0) {
           prev.isScrollLeft = false;

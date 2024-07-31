@@ -97,9 +97,7 @@ export const CommentItem = ({
 
   const fetchRepliesRelatedData = (trigger: boolean) => {
     if (trigger && numberOfReplies && requestTime) {
-      console.log("trigger");
       if (!listReplies) {
-        console.log("fetch");
         const fetch = async () => {
           setIsLoadingReplies(true);
 

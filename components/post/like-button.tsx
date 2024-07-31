@@ -61,7 +61,6 @@ export const LikeButton = ({
           });
           postCards[index].likeStatus = !isLiked;
           postCards[index].likeCounts! += isLiked ? -1 : 1;
-          console.log("INLIKEBUTTON");
         }
 
         toast.error("Something went wrong, try again later.");

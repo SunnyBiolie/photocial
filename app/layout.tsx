@@ -26,7 +26,7 @@ export default function RootLayout({
             <Toaster richColors position="bottom-right" closeButton />
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme="dark"
               enableSystem
               disableTransitionOnChange
             >

@@ -40,10 +40,11 @@ export default function ProfilePage({ params }: Props) {
         if (list === undefined) {
           setListPosts([]);
         } else {
+          const listReverse = list ? [...list].reverse() : null;
           if (currentAccount.id === profileOwner.id) {
-            setListPostsOfCurrentAccount(list);
+            setListPostsOfCurrentAccount(listReverse);
           }
-          setListPosts(list);
+          setListPosts(listReverse);
         }
       }
     };
@@ -87,9 +88,7 @@ export default function ProfilePage({ params }: Props) {
               <div className="bg-jet size-full aspect-square animate-pulse"></div>
             </>
           ) : (
-            listPosts
-              .toReversed()
-              .map((p) => <ProfilePostItem key={p.id} post={p} />)
+            listPosts.map((p) => <ProfilePostItem key={p.id} post={p} />)
           )}
         </div>
       )}
