@@ -66,7 +66,7 @@ export const Dialog = ({
                 disabled={isLoading === "loading"}
                 onClick={onClick}
               >
-                {isLoading === "loading" ? (
+                {isLoading === "idle" ? (
                   <span
                     className={cn(
                       type === "warning" ? "text-rose-500" : "text-sky-500"
@@ -74,7 +74,7 @@ export const Dialog = ({
                   >
                     {acceptText}
                   </span>
-                ) : isLoading === "idle" ? (
+                ) : isLoading === "loading" ? (
                   <Loading size={20} />
                 ) : isLoading === "done" ? (
                   <CircleCheck className="size-7 text-sky-500 animate-fade-in" />

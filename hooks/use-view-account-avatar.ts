@@ -29,7 +29,7 @@ export const useViewAccountAvatar = create<ViewFullState>()(
         },
       }),
       {
-        name: "view-full-state",
+        name: "view-account-avatar",
       }
     )
   )

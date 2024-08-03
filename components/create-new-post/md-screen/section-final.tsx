@@ -139,8 +139,6 @@ export const CNP_FinalState_MD = () => {
           setImageFiles(undefined);
           setListPostsOfCurrentAccount(undefined);
           setCurrentAccountNumberOf(undefined);
-
-          setListPostsOfCurrentAccount(undefined);
         } else if (type === "error") {
         }
       },
