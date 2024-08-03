@@ -84,7 +84,7 @@ export const AuthSlider = ({ slides }: AuthSliderProps) => {
   }, [currentIndex, firstSlideIndex, lastSlideIndex, slides, activeSlide]);
 
   return (
-    <div className="fixed size-full">
+    <div className="fixed top-0 left-0 size-full">
       <Slide ref={firstSlideRef} slide={slides[firstSlideIndex]} />
       <Slide ref={lastSlideRef} slide={slides[lastSlideIndex]} />
     </div>
