@@ -68,7 +68,7 @@ export const ProfileInfor = ({ profileOwner, isYourProfile }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (!currentAccount) return;
+    if (!currentAccount || isYourProfile) return;
 
     const fetch = async () => {
       const isFollowed = await checkAccountFollowdByCurrentAccount(
@@ -84,13 +84,16 @@ export const ProfileInfor = ({ profileOwner, isYourProfile }: Props) => {
 
   if (!currentAccount) return;
 
-  if (numberOf === undefined || isFollowedByCurrentAccount === undefined)
+  if (
+    numberOf === undefined ||
+    (!isYourProfile && isFollowedByCurrentAccount === undefined)
+  )
     return <ProfileInforSkeleton />;
   if (numberOf === null) return <ErrorMessage />;
 
   return (
     <div className="mx-2 py-10 flex flex-col items-center justify-center gap-y-4 md:w-[min(100%,450px)] md:mx-auto">
-      <AccountAvatar account={profileOwner} className="size-32" />
+      <AccountAvatar account={profileOwner} sizes="256px" className="size-32" />
       <div>
         <p className="text-xl font-semibold">{profileOwner.userName}</p>
       </div>
@@ -120,7 +123,7 @@ export const ProfileInfor = ({ profileOwner, isYourProfile }: Props) => {
           <FollowButton
             currentAccountId={currentAccount.id}
             targetAccount={profileOwner}
-            isFollowedByCurrentAccount={isFollowedByCurrentAccount}
+            isFollowedByCurrentAccount={isFollowedByCurrentAccount!}
           />
         )}
       </div>

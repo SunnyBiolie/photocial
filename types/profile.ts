@@ -1,5 +1,6 @@
 export type UpdateProfileData = {
   avatar?: File;
+  isPrivate?: boolean;
   userName?: string;
 };
 

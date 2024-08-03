@@ -6,11 +6,14 @@ import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
 import { Account } from "@prisma/client";
 import { UpdateProfileData } from "@/types/profile";
+import { cn } from "@/lib/utils";
 import { updateAccount } from "@/action/account/update";
-import { ImageUp, Loader } from "lucide-react";
+import { useViewDialog } from "@/hooks/use-view-dialog";
+import { useCurrentAccount } from "@/hooks/use-current-account";
 import { ButtonCloseFullView } from "../others/btn-close-full-view";
 import { Loading } from "../others/loading";
-import { cn } from "@/lib/utils";
+import { ToggleButton } from "../others/toggle-button";
+import { ImageOff, ImageUp } from "lucide-react";
 
 interface Props {
   currentAccount: Account;
@@ -18,12 +21,15 @@ interface Props {
 
 export const EditProfileButton = ({ currentAccount }: Props) => {
   const { user } = useUser();
+  const { setRequestCurrentAccount } = useCurrentAccount();
+  const { setDialogData } = useViewDialog();
 
   const inputRef = useRef<ElementRef<"input">>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [updateData, setUpdateData] = useState<UpdateProfileData>();
   const [newImageURL, setNewImageURL] = useState<string>();
+  // const [isPrivate, setIsPrivate] = useState(currentAccount.isPrivate);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -63,10 +69,34 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
       if (newImageURL) URL.revokeObjectURL(newImageURL);
       setUpdateData(undefined);
       setNewImageURL(undefined);
+      // setIsPrivate(currentAccount.isPrivate);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing]);
+
+  // useEffect(() => {
+  //   if (isPrivate !== currentAccount.isPrivate) {
+  //     setUpdateData((prev) => {
+  //       if (prev) {
+  //         prev.isPrivate = isPrivate;
+  //         return { ...prev };
+  //       } else {
+  //         return {
+  //           isPrivate,
+  //         };
+  //       }
+  //     });
+  //   } else {
+  //     setUpdateData((prev) => {
+  //       if (prev && Object.values(prev).length !== 1) {
+  //         prev.isPrivate = undefined;
+  //         return { ...prev };
+  //       } else {
+  //         return undefined;
+  //       }
+  //     });
+  //   }
+  // }, [currentAccount, isPrivate]);
 
   const changeAvatar = () => {
     if (inputRef.current) {
@@ -79,7 +109,6 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
     setIsLoading(true);
 
     let imageURL: string | undefined;
-    let userName: string | undefined;
 
     if (updateData.avatar) {
       try {
@@ -91,18 +120,17 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
         console.warn(err);
       }
     }
-    if (updateData.userName) {
-      // try {
-      //   await user.update({
-      //     username:
-      //   })
-      // }
-    }
 
-    const isSuccess = await updateAccount(user.id, imageURL, userName);
+    const isSuccess = await updateAccount(
+      user.id,
+      imageURL,
+      updateData.isPrivate
+    );
 
-    if (isSuccess) toast.success("Your changes have been saved");
-    else toast.error("Prisma error: failed to update profile");
+    if (isSuccess) {
+      toast.success("Your changes have been saved");
+      setRequestCurrentAccount([]);
+    } else toast.error("Prisma error: failed to update profile");
 
     setIsLoading(false);
     setIsEditing(false);
@@ -111,10 +139,10 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
   return (
     <>
       <button
-        className="py-2 w-[min(100%,450px)] rounded-md border dark:border-jet dark:hover:bg-neutral-900/50 transition-colors"
+        className="py-2 w-[min(100%,450px)] rounded-lg border dark:border-jet dark:bg-neutral-200 dark:text-neutral-700 dark:font-medium transition-colors"
         onClick={() => setIsEditing(true)}
       >
-        <span className="text-sm">Edit profile</span>
+        <span className="text-sm font-medium">Edit profile</span>
       </button>
       {isEditing && (
         <div className="fixed size-full top-0 left-0 z-10">
@@ -127,11 +155,11 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-fade-in">
             <h5 className="py-3 text-center font-bold">Edit profile</h5>
             <div className="w-[min(100vw-24px,500px)] p-6 border rounded-lg shadow-md dark:bg-black-chocolate dark:border-jet">
-              <div className="flex flex-col items-center gap-4">
-                <div className="rounded-full overflow-hidden">
-                  <input ref={inputRef} type="file" hidden />
+              <div className="flex flex-col items-center gap-6">
+                <div className="relative flex">
+                  <input ref={inputRef} type="file" accept="image/*" hidden />
                   <div
-                    className="relative size-32 cursor-pointer"
+                    className="relative group size-32 rounded-full overflow-hidden cursor-pointer"
                     onClick={changeAvatar}
                   >
                     <Image
@@ -141,27 +169,52 @@ export const EditProfileButton = ({ currentAccount }: Props) => {
                       sizes="256px"
                       className="object-cover"
                     />
-                    <div className="group absolute top-0 left-0 size-full opacity-0 hover:opacity-100 dark:bg-neutral-950/50 transition-opacity">
-                      <ImageUp className="size-8 absolute left-1/2 -translate-x-1/2 top-1/2 group-hover:-translate-y-1/2 transition-all" />
+                    <div className="absolute top-0 left-0 size-full ">
+                      <div className="absolute top-0 left-0 size-full opacity-0 group-hover:opacity-100 dark:bg-neutral-900/50 transition-opacity">
+                        <ImageUp className="size-8 absolute left-1/2 -translate-x-1/2 top-1/2 group-hover:-translate-y-1/2 transition-all" />
+                      </div>
                     </div>
                   </div>
                 </div>
-                {/* <div className="flex-1">
-                  <p>Username</p>
+                {/* <div className="w-full flex items-center justify-between">
+                  <p className="font-medium">Private account</p>
+                  <ToggleButton
+                    defaultValue={currentAccount.isPrivate}
+                    doWhenCheck={() => setIsPrivate(true)}
+                    doWhenNotCheck={() => setIsPrivate(false)}
+                  />
                 </div> */}
                 <div className="w-full mt-4">
                   <button
                     className={cn(
-                      "w-full p-2.5 rounded-lg disabled:cursor-not-allowed dark:text-coffee-bean dark:bg-neutral-100 dark:hover:bg-neutral-200 transition-colors",
-                      !isLoading && "dark:disabled:bg-neutral-400"
+                      "w-full p-3 rounded-lg disabled:cursor-not-allowed dark:text-coffee-bean dark:bg-neutral-100 transition-colors dark:disabled:bg-neutral-400"
                     )}
-                    onClick={updateProfile}
                     disabled={isLoading || !updateData}
+                    onClick={() => {
+                      if (!updateData) return;
+                      if (updateData.isPrivate === undefined) {
+                        updateProfile();
+                      } else {
+                        setDialogData({
+                          titleType: "message",
+                          titleContent: updateData.isPrivate
+                            ? "Private profile?"
+                            : "Public profile?",
+                          type: "double-check",
+                          acceptText: "OK",
+                          message: updateData.isPrivate
+                            ? "Switch to private profile, only followers can see and interact with your content"
+                            : "Switch to public profile, everyone can see and interact with your content",
+                          handleAccept: updateProfile,
+                          handleCancel: () => {},
+                        });
+                      }
+                    }}
                   >
                     {isLoading ? (
-                      <Loading containerClassName="py-0.5" className="size-5" />
+                      <Loading size={20} className="py-0.5" />
                     ) : (
-                      <span className="font-medium text-center">
+                      <span className="font-medium text-sm text-center">
                         Save change
                       </span>
                     )}

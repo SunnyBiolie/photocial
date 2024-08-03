@@ -7,6 +7,8 @@ import { getAccountByUserName } from "@/action/account/get";
 import { useCurrentAccount } from "@/hooks/use-current-account";
 import { useProfilePageData } from "@/hooks/use-profile-page-data";
 import { ProfilePostItem } from "@/components/profile/profile-post-item";
+import { Loading } from "@/components/others/loading";
+import { ErrorMessage } from "@/components/others/error-message";
 import { ImagePlus } from "lucide-react";
 
 interface Props {
@@ -16,11 +18,13 @@ interface Props {
 }
 
 export default function ProfilePage({ params }: Props) {
-  const { listPostsOfCurrentAccount, setListPostsOfCurrentAccount } =
+  const { listPostsOfCurrentAccount, setListPostsOfCurrentAccount, scrollTop } =
     useProfilePageData();
   const { currentAccount } = useCurrentAccount();
 
   const [listPosts, setListPosts] = useState<Post[] | null>();
+
+  const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
     if (!currentAccount) return;
@@ -34,11 +38,11 @@ export default function ProfilePage({ params }: Props) {
     const fetch = async () => {
       const profileOwner = await getAccountByUserName(params.username);
       if (!profileOwner) {
-        setListPosts([]);
+        setIsError(true);
       } else {
         const list = await getListPostsByAccountId(profileOwner.id);
         if (list === undefined) {
-          setListPosts([]);
+          setIsError(true);
         } else {
           const listReverse = list ? [...list].reverse() : null;
           if (currentAccount.id === profileOwner.id) {
@@ -48,18 +52,26 @@ export default function ProfilePage({ params }: Props) {
         }
       }
     };
-
     fetch();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
+  useEffect(() => {
+    if (listPosts !== undefined) window.scrollTo({ top: scrollTop });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listPosts]);
+
   if (!currentAccount) return;
+
+  if (isError) return <ErrorMessage className="py-8" />;
 
   return (
     <div className="py-2">
-      {listPosts === null ? (
-        <div className="h-96 flex flex-col items-center justify-center gap-y-6">
+      {listPosts === undefined ? (
+        <Loading className="py-8" />
+      ) : listPosts === null ? (
+        <div className="h-80 flex flex-col items-center justify-center gap-y-6">
           <div className="p-6 rounded-full border border-unselected">
             <ImagePlus strokeWidth={1} className="size-10 text-unselected" />
           </div>
@@ -78,18 +90,9 @@ export default function ProfilePage({ params }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-1 md:grid-cols-3">
-          {listPosts === undefined ? (
-            <>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-            </>
-          ) : (
-            listPosts.map((p) => <ProfilePostItem key={p.id} post={p} />)
-          )}
+          {listPosts.map((p) => (
+            <ProfilePostItem key={p.id} post={p} />
+          ))}
         </div>
       )}
     </div>

@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes loader-pulse {
+  0%,
+  80%,
+  100% {
+    transform: scaleY(0.75);
+    opacity: 0;
+  }
+  20% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
 :root,
 html,
 body {
@@ -26,6 +39,21 @@ body {
   --app-navbar-horizontal-height: 68px;
 }
 
+/* #region: Sử dụng cho các trình duyệt cũ */
+.dark body {
+  --foreground-rgb: 229, 229, 229;
+  --background-start-rgb: var(--rich-black);
+  --background-end-rgb: var(--rich-black);
+
+  --normal: rgb(229, 229, 229);
+  --unselected: rgb(82, 82, 82);
+}
+.dark ::selection {
+  color: #232425;
+  background: #f1f1f1;
+}
+/* #endregion */
+
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 229, 229, 229;
@@ -45,6 +73,7 @@ body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, transparent, var(--background-end-rgb))
     var(--background-start-rgb);
+  overflow-y: scroll;
 }
 
 @layer utilities {

@@ -68,7 +68,7 @@ export const HomeContent = () => {
   return (
     <div>
       {postCards === undefined ? (
-        <Loading containerClassName="py-12" />
+        <Loading className="py-12" />
       ) : postCards === null ? (
         <div className="py-10 text-center space-y-4 dark:text-neutral-300">
           <h6 className="text-xl font-bold">No posts to show.</h6>

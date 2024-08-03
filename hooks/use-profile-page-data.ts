@@ -9,6 +9,8 @@ interface Props {
   setCurrentAccountNumberOf: (numberOf: NumberOf | undefined) => void;
   listSavedPostsOfCurrentAccount: Post[] | null | undefined;
   setListSavedPostsOfCurrentAccount: (list: Post[] | null | undefined) => void;
+  scrollTop: number;
+  setScrollTop: (scrollTop: number) => void;
 }
 
 export const useProfilePageData = create<Props>()((set) => ({
@@ -24,4 +26,6 @@ export const useProfilePageData = create<Props>()((set) => ({
   setListSavedPostsOfCurrentAccount: (list: Post[] | null | undefined) => {
     set({ listSavedPostsOfCurrentAccount: list });
   },
+  scrollTop: 0,
+  setScrollTop: (scrollTop) => set({ scrollTop }),
 }));

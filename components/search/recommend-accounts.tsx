@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Account } from "@prisma/client";
-import { getListAccountsByPrivateStatus } from "@/action/account/get";
+import {
+  getAllAccount,
+  getListAccountsByPrivateStatus,
+} from "@/action/account/get";
 import { DummyItem, SearchItem, SearchItemSkeleton } from "./search-item";
 import { ErrorMessage } from "../others/error-message";
 import { useSearchPageData } from "@/hooks/use-search-page-data";
 import { useCurrentAccount } from "@/hooks/use-current-account";
 import { getListFollowingIdByAccountId } from "@/action/follows/get";
+import { Loading } from "../others/loading";
 
 interface Props {
   className?: string;
@@ -28,7 +32,7 @@ export const RecommendedAccounts = ({ className }: Props) => {
   useEffect(() => {
     if (currentAccount && recommended === undefined) {
       const fetch = async () => {
-        const list = await getListAccountsByPrivateStatus(false);
+        const list = await getAllAccount();
 
         if (list === undefined) {
           setIsError(true);
@@ -77,19 +81,16 @@ export const RecommendedAccounts = ({ className }: Props) => {
 
   if (!currentAccount) return;
 
-  if (isError) return <ErrorMessage className="py-4" />;
-
   return (
     <>
       <div className={className}>
         <h6 className="py-4 font-bold">Recommend</h6>
-        {listAccounts === undefined ||
-        listIsFollowedByCurrentAccount === undefined ? (
+        {isError ? (
+          <ErrorMessage className="py-4" />
+        ) : listAccounts === undefined ||
+          listIsFollowedByCurrentAccount === undefined ? (
           <div>
-            <SearchItemSkeleton />
-            <SearchItemSkeleton />
-            <SearchItemSkeleton />
-            <SearchItemSkeleton />
+            <Loading className="py-6" />
           </div>
         ) : listAccounts === null || listAccounts.length === 1 ? (
           <p className="py-4 text-center text-sm font-semibold text-neutral-400">

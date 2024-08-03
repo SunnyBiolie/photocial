@@ -77,7 +77,7 @@ export const PostMoreOptions = ({ post, inModal }: Props) => {
           {isServerError ? (
             <ErrorMessage />
           ) : isSavedByCurrentAccount === undefined ? (
-            <Loading className="size-5" containerClassName="py-2" />
+            <Loading size={20} className="py-3" />
           ) : (
             <div className="space-y-1">
               {isBelongsToCurrentAccount && (
@@ -144,16 +144,19 @@ const ButtonSavePost = ({
 
   return (
     <button
-      className="w-full p-3 flex items-center justify-between rounded-md cursor-pointer disabled:cursor-default disabled:opacity-50 disabled:bg-jet dark:hover:bg-neutral-800 transition-all"
+      className="w-full p-3 flex items-center justify-between rounded-md cursor-pointer disabled:cursor-default dark:hover:bg-neutral-800 dark:disabled:hover:bg-transparent transition-all"
       onClick={hanleToggleSave}
       disabled={isProcessing}
     >
       <span className="font-semibold">{isSaved ? "Saved" : "Save"}</span>
       {isProcessing ? (
-        <Loading className="size-5" containerClassName="size-fit" />
+        <Loading size={20} stroke={2} className="size-fit" />
       ) : (
         <Bookmark
-          className={cn("size-5 animate-fade-in", isSaved && "fill-current")}
+          className={cn(
+            "size-5 animate-[fade-in_.2s_linear]",
+            isSaved && "fill-current"
+          )}
         />
       )}
     </button>

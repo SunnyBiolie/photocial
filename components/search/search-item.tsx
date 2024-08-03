@@ -29,7 +29,7 @@ export const SearchItem = ({ account, isFollowedByCurrentAccount }: Props) => {
           )}
         </Link>
         {currentAccount.id !== account.id && (
-          <div className="w-28">
+          <div className="">
             <FollowButton
               currentAccountId={currentAccount.id}
               targetAccount={account}
@@ -59,7 +59,7 @@ export const DummyItem = () => {
   return (
     <div className="p-2 flex items-center">
       <div className="relative size-10 mr-3 rounded-full overflow-hidden cursor-pointer bg-neutral-300 dark:bg-neutral-600"></div>
-      <p className="font-bold">Dummy user</p>
+      <p className="font-semibold">Dummy user</p>
     </div>
   );
 };

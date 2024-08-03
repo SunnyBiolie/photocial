@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Account } from "@prisma/client";
-import { useCurrentAccount } from "@/hooks/use-current-account";
 import { getAccountByUserName } from "@/action/account/get";
+import { useCurrentAccount } from "@/hooks/use-current-account";
+import { useProfilePageData } from "@/hooks/use-profile-page-data";
 import { ProfileInfor } from "@/components/profile/profile-infor";
 import { ProfileNavigationBar } from "@/components/profile/profile-navbar";
 import { Footer } from "@/components/others/footer";
@@ -18,18 +19,28 @@ interface Props {
 
 export default function ProfileLayout_Client({ params, children }: Props) {
   const { currentAccount } = useCurrentAccount();
+  const { setScrollTop } = useProfilePageData();
   const [isError, setIsError] = useState(false);
   const [profileOwner, setProfileOwner] = useState<Account | null>();
 
   useEffect(() => {
-    const fetch = async () => {
-      const acc = await getAccountByUserName(params.username);
-      if (acc === undefined) {
-        setIsError(true);
-      } else setProfileOwner(acc);
-    };
-    fetch();
-  }, [params]);
+    return () => setScrollTop(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (currentAccount && currentAccount.userName === params.username) {
+      setProfileOwner(currentAccount);
+    } else {
+      const fetch = async () => {
+        const acc = await getAccountByUserName(params.username);
+        if (acc === undefined) {
+          setIsError(true);
+        } else setProfileOwner(acc);
+      };
+      fetch();
+    }
+  }, [currentAccount, params]);
 
   if (!currentAccount || profileOwner === undefined) return;
 

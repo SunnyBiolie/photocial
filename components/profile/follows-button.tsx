@@ -38,29 +38,23 @@ export const FollowsButton = ({
   const [listIsFollowedByCurrentAccount, setListIsFollowedByCurrentAccount] =
     useState<boolean[] | null>();
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       const fetch = async () => {
         if (type === "followers") {
           const list = await getListFollowersIdByAccountId(profileOwner.id);
           if (list === undefined) {
-            // setListFollowsAccounts === [] để hiển thị thông báo lỗi
-            setListAccountIds(undefined);
-            setListFollowsAccounts([]);
-          } else if (list === null) {
-            setListAccountIds(null);
-            setListFollowsAccounts(null);
+            setIsError(true);
           } else {
             setListAccountIds(list);
           }
         } else if (type === "following") {
           const list = await getListFollowingIdByAccountId(profileOwner.id);
           if (list === undefined) {
-            setListAccountIds(undefined);
-            setListFollowsAccounts([]);
-          } else if (list === null) {
-            setListAccountIds(null);
-            setListFollowsAccounts(null);
+            setIsError(true);
           } else {
             setListAccountIds(list);
           }
@@ -70,39 +64,59 @@ export const FollowsButton = ({
     } else {
       setListAccountIds(undefined);
       setListFollowsAccounts(undefined);
+      setListIsFollowedByCurrentAccount(undefined);
+      setIsLoading(true);
+      setIsError(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   useEffect(() => {
-    if (listAccountIds && listAccountIds.length !== 0) {
-      const fetch = async () => {
-        const list = await getListAccountsByListAccountIds(listAccountIds);
-        if (list === undefined) {
-          setListFollowsAccounts([]);
-        } else {
-          if (list) {
-            const listFollowingId = await getListFollowingIdByAccountId(
-              currentAccountId
-            );
-            if (listFollowingId === undefined) {
-              setListFollowsAccounts([]);
-            } else if (listFollowingId === null) {
+    if (listAccountIds === undefined) return;
+    if (listAccountIds === null) {
+      setListFollowsAccounts(null);
+      setIsLoading(false);
+    } else {
+      if (type === "following") {
+        const fetch = async () => {
+          const list = await getListAccountsByListAccountIds(listAccountIds);
+          if (list === undefined) {
+            setIsError(true);
+          } else {
+            if (list === null) {
               setListIsFollowedByCurrentAccount(null);
             } else {
-              const listIds = listAccountIds.map((id) => {
-                return list.some((acc) => acc.id === id);
-              });
-
-              setListIsFollowedByCurrentAccount(listIds);
+              const listFollowingId = await getListFollowingIdByAccountId(
+                currentAccountId
+              );
+              if (listFollowingId === undefined) {
+                setIsError(true);
+              } else if (listFollowingId === null) {
+                setListIsFollowedByCurrentAccount(null);
+              } else {
+                const listIds = list.map((acc) => {
+                  return listFollowingId.some((id) => id === acc.id);
+                });
+                setListIsFollowedByCurrentAccount(listIds);
+              }
             }
-          } else {
-            setListIsFollowedByCurrentAccount(null);
+            setListFollowsAccounts(list);
           }
-          setListFollowsAccounts(list);
-        }
-      };
-      fetch();
+          setIsLoading(false);
+        };
+        fetch();
+      } else {
+        const fetch = async () => {
+          const list = await getListAccountsByListAccountIds(listAccountIds);
+          if (list === undefined) {
+            setIsError(true);
+          } else {
+            setListFollowsAccounts(list);
+          }
+          setIsLoading(false);
+        };
+        fetch();
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -131,11 +145,10 @@ export const FollowsButton = ({
               {type === "followers" ? "Followers" : "Following"}
             </h5>
             <div className="w-[min(100vw-24px,400px)] p-6 border rounded-lg shadow-md dark:bg-coffee-bean dark:border-jet">
-              {listFollowsAccounts === undefined ||
-              listIsFollowedByCurrentAccount === undefined ? (
-                <div className="w-full py-2.5">
-                  <Loading className="size-5" />
-                </div>
+              {isLoading ? (
+                <Loading className="py-2" />
+              ) : isError ? (
+                <ErrorMessage className="py-2.5" />
               ) : listFollowsAccounts === null ? (
                 <p className="py-2.5 text-center text-sm text-neutral-400">
                   {type === "followers"
@@ -146,11 +159,9 @@ export const FollowsButton = ({
                     ? "You don't follow anyone yet."
                     : `${profileOwner.userName} doesn't follow anyone yet.`}
                 </p>
-              ) : listFollowsAccounts.length === 0 ? (
-                <ErrorMessage />
               ) : (
                 <div className="space-y-4 animate-fade-in">
-                  {listFollowsAccounts.map((account, i) => (
+                  {listFollowsAccounts?.map((account, i) => (
                     <FollowsItem
                       key={account.id}
                       currentAccountId={currentAccountId}
@@ -197,11 +208,11 @@ const FollowsItem = ({
         className="shrink-0 size-10 mr-3"
       />
       <div className="flex-1">
-        <Link href={`@${targetAccount.userName}`} className="font-bold">
+        <Link href={`@${targetAccount.userName}`} className="font-semibold">
           {targetAccount.userName}
         </Link>
       </div>
-      <div className="shrink-0 w-20">
+      <div className="shrink-0">
         {isYourProfile && type === "followers" ? (
           <RemoveFollowerButton
             currentAccountId={currentAccountId}

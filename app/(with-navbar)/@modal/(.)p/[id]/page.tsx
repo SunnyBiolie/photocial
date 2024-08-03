@@ -95,7 +95,7 @@ export default function PostModal({ params }: Props) {
         className="fixed top-0 left-0 size-full bg-neutral-900/75 z-50 flex items-center justify-center"
         onClick={handleBack}
       >
-        <Loading />
+        <Loading size={28} />
       </div>
     );
   else if (post === null) return <PostModal.NotFound handleBack={handleBack} />;

@@ -8,6 +8,7 @@ import { unfollowAccount } from "@/action/follows/delete";
 import { followAccount } from "@/action/follows/create";
 import { useViewDialog } from "@/hooks/use-view-dialog";
 import { Loader } from "lucide-react";
+import { Loading } from "./loading";
 
 interface Props {
   currentAccountId: string;
@@ -28,6 +29,8 @@ export const FollowButton = ({
     isFollowedByCurrentAccount
   );
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  if (currentAccountId === targetAccount.id) return;
 
   const toggleFollowAccount = async () => {
     if (isFollowed === undefined) return;
@@ -67,14 +70,14 @@ export const FollowButton = ({
   return (
     <button
       className={cn(
-        "relative p-2 w-full rounded-md border flex items-start justify-center transition-colors disabled:cursor-not-allowed dark:border-jet dark:hover:bg-neutral-900/50",
+        "relative px-4 py-2 w-full min-w-20 rounded-md border flex items-start justify-center transition-colors disabled:cursor-not-allowed dark:border-unselected",
         className
       )}
       disabled={isProcessing}
       onClick={toggleFollowAccount}
     >
       {isProcessing ? (
-        <Loader className="size-5 animate-slow-spin" />
+        <Loading size={16} stroke={1.5} className="py-0.5" />
       ) : (
         <span className="text-sm">{isFollowed ? "Following" : "Follow"}</span>
       )}

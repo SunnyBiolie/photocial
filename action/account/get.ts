@@ -76,6 +76,15 @@ export const checkAccountSavedPost = async (
   }
 };
 
+export const getAllAccount = async () => {
+  try {
+    const list = await prisma.account.findMany();
+    return list.length > 0 ? list : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const getListAccountsByListAccountIds = async (accountIds: string[]) => {
   try {
     const list = await prisma.account.findMany({

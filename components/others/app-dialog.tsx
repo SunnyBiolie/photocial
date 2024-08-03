@@ -121,7 +121,7 @@ export const AppDialog = () => {
                     {acceptText}
                   </span>
                 ) : state === "loading" ? (
-                  <Loading className="text-white size-5" />
+                  <Loading size={20} />
                 ) : state === "done" ? (
                   <CircleCheck className="size-7 text-sky-500 animate-fade-in" />
                 ) : (

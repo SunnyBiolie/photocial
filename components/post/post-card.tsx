@@ -196,7 +196,7 @@ export const PostCard = ({
         {post.caption && (
           <div className="mt-2">
             <span className="font-semibold inline-block">
-              {account.userName}&nbsp;
+              {author.userName}&nbsp;&nbsp;
             </span>
             <div className="inline hyphens-auto whitespace-pre-line">
               {captionDisplay}

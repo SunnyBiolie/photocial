@@ -33,7 +33,7 @@ export const ProfilePostItem = ({ post }: Props) => {
   };
 
   return (
-    <Link href={`/p/${post.id}`} className="relative bg-jet">
+    <Link href={`/p/${post.id}`} className="relative bg-jet animate-fade-in">
       <Image
         loader={imageKitLoader}
         src={`${post.listImageURLs[0]}`}

@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 export const updateAccount = async (
   accountId: string,
   imageURL?: string,
-  userName?: string
+  isPrivate?: boolean
 ) => {
   try {
     if (imageURL) {
@@ -15,6 +15,17 @@ export const updateAccount = async (
         },
         data: {
           imageUrl: imageURL,
+        },
+      });
+    }
+
+    if (isPrivate !== undefined) {
+      await prisma.account.update({
+        where: {
+          id: accountId,
+        },
+        data: {
+          isPrivate,
         },
       });
     }

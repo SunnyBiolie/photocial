@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Account } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
 import { getAccountByAccountId } from "@/action/account/get";
@@ -9,6 +16,7 @@ import { createAccount } from "@/action/account/create";
 const AccountContext = createContext<
   | {
       currentAccount: Account | undefined;
+      setRequestCurrentAccount: Dispatch<SetStateAction<never[]>>;
     }
   | undefined
 >(undefined);
@@ -21,6 +29,8 @@ export const AccountContextProvider = (props: Props) => {
   const { user } = useUser();
 
   const [currentAccount, setCurrentAccount] = useState<Account>();
+
+  const [requestCurrentAccount, setRequestCurrentAccount] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -43,10 +53,11 @@ export const AccountContextProvider = (props: Props) => {
       };
       init();
     }
-  }, [user]);
+  }, [user, requestCurrentAccount]);
 
   const value = {
     currentAccount,
+    setRequestCurrentAccount,
   };
 
   return <AccountContext.Provider value={value} {...props} />;

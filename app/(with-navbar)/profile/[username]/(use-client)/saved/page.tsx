@@ -6,6 +6,8 @@ import { getListPostsSavedByUserName } from "@/action/post/get";
 import { useCurrentAccount } from "@/hooks/use-current-account";
 import { useProfilePageData } from "@/hooks/use-profile-page-data";
 import { ProfilePostItem } from "@/components/profile/profile-post-item";
+import { Loading } from "@/components/others/loading";
+import { ErrorMessage } from "@/components/others/error-message";
 
 interface Props {
   params: { username: string };
@@ -13,10 +15,15 @@ interface Props {
 
 export default function ProfileSavedPage({ params }: Props) {
   const { currentAccount } = useCurrentAccount();
-  const { listSavedPostsOfCurrentAccount, setListSavedPostsOfCurrentAccount } =
-    useProfilePageData();
+  const {
+    listSavedPostsOfCurrentAccount,
+    setListSavedPostsOfCurrentAccount,
+    scrollTop,
+  } = useProfilePageData();
 
   const [listSavedPosts, setListSavedPosts] = useState<Post[] | null>();
+
+  const [isError, setIsError] = useState<boolean>(false);
 
   useEffect(() => {
     if (!currentAccount) return;
@@ -30,7 +37,7 @@ export default function ProfileSavedPage({ params }: Props) {
     const fetch = async () => {
       const list = await getListPostsSavedByUserName(params.username);
       if (list === undefined) {
-        setListSavedPosts([]);
+        setIsError(true);
       } else {
         const listReverse = list ? [...list].reverse() : null;
         if (isBelongstoCurrentAccount) {
@@ -44,14 +51,23 @@ export default function ProfileSavedPage({ params }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (listSavedPosts !== undefined) window.scrollTo({ top: scrollTop });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listSavedPosts]);
+
   if (!currentAccount) return;
 
   const isBelongstoCurrentAccount = currentAccount.userName === params.username;
 
+  if (isError) return <ErrorMessage className="py-10" />;
+
   return (
     <div className="py-2">
-      {listSavedPosts === null ? (
-        <div className="h-96 flex flex-col items-center justify-center gap-y-6">
+      {listSavedPosts === undefined ? (
+        <Loading className="py-8" />
+      ) : listSavedPosts === null ? (
+        <div className="h-80 flex flex-col items-center justify-center gap-y-6">
           <div className="space-y-4">
             <p className="text-3xl font-bold text-center">
               {isBelongstoCurrentAccount ? `Nothing to show!` : `No Posts Yet.`}
@@ -65,18 +81,9 @@ export default function ProfileSavedPage({ params }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-1 md:grid-cols-3">
-          {listSavedPosts === undefined ? (
-            <>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-              <div className="bg-jet size-full aspect-square animate-pulse"></div>
-            </>
-          ) : (
-            listSavedPosts.map((p) => <ProfilePostItem key={p.id} post={p} />)
-          )}
+          {listSavedPosts.map((p) => (
+            <ProfilePostItem key={p.id} post={p} />
+          ))}
         </div>
       )}
     </div>

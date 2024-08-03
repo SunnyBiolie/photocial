@@ -4,6 +4,7 @@ import { ElementRef, MouseEvent, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useProfilePageData } from "@/hooks/use-profile-page-data";
 import { NavItem } from "../others/app-navbar";
 import { Bookmark, Grid3X3 } from "lucide-react";
 
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export const ProfileNavigationBar = ({ userName }: Props) => {
+  const { setScrollTop } = useProfilePageData();
+
   const pathname = usePathname();
 
   const navRef = useRef<ElementRef<"nav">>(null);
@@ -69,6 +72,7 @@ export const ProfileNavigationBar = ({ userName }: Props) => {
       width: e.currentTarget.getBoundingClientRect().width,
       left: e.currentTarget.offsetLeft,
     });
+    setScrollTop(window.scrollY);
   };
 
   return (
